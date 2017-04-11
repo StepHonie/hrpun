@@ -38,6 +38,13 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     });
   });
 
+  app.get('/userGroup',function(req,res){
+    res.render("userGroup",{
+      data:"Hello Stephanie"
+    });
+  });
+
+
 
   app.get('/normal',function(req,res)
   {

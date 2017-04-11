@@ -4,13 +4,6 @@ $(function()
   var dlgRights=$('#dlgRights');
   var dlgEdit=$('#dlgEdit');
   var dlgNoEdit=$("#dlgNoEdit");
-  $('#btnRights').on('click',function(e)
-  {
-    dlgRights.css({"left":((win.width()-dlgRights.width())/2+"px"),
-             "top":((win.height()-dlgRights.height())/3+"px")});
-    dlgRights.show();
-  });
-
 
   $("#infoTable").find("tbody tr").bind("click",function(e)
   {
@@ -102,15 +95,25 @@ $(function()
     });
     $("textarea").val("");
 
-    dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px")});
+    dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/3+"px")});
     dlgEdit.show();
   });
+
+  // $('#btnRights').on('click',function(e)
+  // {
+  //
+    // dlgRights.css({"left":((win.width()-dlgRights.width())/2+"px"),
+    //          "top":((win.height()-dlgRights.height())/3+"px")});
+    // dlgRights.show();
+  // });
 
 
   $('#btnDel').bind('click',function(e)
   {
     dlgEdit.hide();
   });
+
+
 
   $('.btnClose').bind('click',function(e)
   {
@@ -154,38 +157,39 @@ $(function()
     });
   }
   bindEvent();
-  $('#addRights').bind('click',function()
-  {
-    $('#lstRight').append("<tr><td class='iptName' contenteditable='false' style='width: 250px'>[New Name]<span class='spanDel' style='display:none'><img src='/images/icons/png/delete.png' style='float:right'></span></td><td><img class='checkImg' src='/images/icons/png/check.png' style='display:center'></td><td><img class='checkImg' src='/images/icons/png/check.png'></td></tr>");
-    bindEvent();
-  });
 
-  $('#saveRights').bind('click',function(e)
-  {
-    //alert('sldjf');
-    let tb=$("#lstRight");
-    let lines=tb.find("tr");
-    let list=new Array;
-    for (let i=0;i<lines.length;i++)
-    {
-      let o={user: lines.eq(i).find("td").eq(0).text(),
-             view: (lines.eq(i).find("td").eq(1).find("img").attr("src")==="/images/icons/png/check.png"?false:true),
-             edit: (lines.eq(i).find("td").eq(2).find("img").attr("src")==="/images/icons/png/check.png"?false:true)};
-      list.push(o);
-    }
-    $.ajax({url: "/saveRights",
-            type: "POST",
-            contentType: "application/octet-stream",
-            data: JSON.stringify(list),
-            dataType: "text",
-            success: function(res)
-            {
-              alert("Successfully");
-              dlgRights.hide();
-              //console.log(res);
-            }});
+  // $('#addRights').bind('click',function()
+  // {
+  //   $('#lstRight').append("<tr><td class='iptName' contenteditable='false' style='width: 250px'>[New Name]<span class='spanDel' style='display:none'><img src='/images/icons/png/delete.png' style='float:right'></span></td><td><img class='checkImg' src='/images/icons/png/check.png' style='display:center'></td><td><img class='checkImg' src='/images/icons/png/check.png'></td></tr>");
+  //   bindEvent();
+  // });
 
-  });
+  // $('#saveRights').bind('click',function(e)
+  // {
+  //   //alert('sldjf');
+  //   let tb=$("#lstRight");
+  //   let lines=tb.find("tr");
+  //   let list=new Array;
+  //   for (let i=0;i<lines.length;i++)
+  //   {
+  //     let o={user: lines.eq(i).find("td").eq(0).text(),
+  //            view: (lines.eq(i).find("td").eq(1).find("img").attr("src")==="/images/icons/png/check.png"?false:true),
+  //            edit: (lines.eq(i).find("td").eq(2).find("img").attr("src")==="/images/icons/png/check.png"?false:true)};
+  //     list.push(o);
+  //   }
+  //   $.ajax({url: "/saveRights",
+  //           type: "POST",
+  //           contentType: "application/octet-stream",
+  //           data: JSON.stringify(list),
+  //           dataType: "text",
+  //           success: function(res)
+  //           {
+  //             alert("Successfully");
+  //             dlgRights.hide();
+  //             //console.log(res);
+  //           }});
+  //
+  // });
 
   $('#iptNum').keydown(function(e)
   {
