@@ -1,0 +1,42 @@
+html, body{
+    width: 100%;
+    margin: 0px;
+    height: 100%;
+}
+
+
+.banner{
+    width: 100%;
+    height: 150px;
+    background-color: #666;
+    text-align: center;
+    color: #FEFEFE;
+    line-height: 150px;
+}
+
+
+
+.banner-text{
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 20px;
+    font-size: 36px;
+}
+
+
+.login-box{
+    width: 400px;
+    height: 320px;
+    border: solid 1px #AAA;
+    border-radius: 5px;
+    margin: auto;
+    margin-top: 40px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+    padding-top: 40px;
+}
+
+.error-message{
+    color: #FF3333;
+}

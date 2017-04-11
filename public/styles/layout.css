@@ -1,0 +1,37 @@
+#dlgRights{
+  position: fixed;
+  z-index:10000;
+  width: 500px;
+  box-shadow: 0px 0px 4px #000;
+}
+
+#dlgEdit, #dlgNoEdit{
+  position:fixed;
+  top: 0px;
+  z-index:10000;
+  width:1000px;
+  box-shadow: 0px 0px 4px #000;
+}
+
+#btnPage{
+  bottom: 0;
+  width: 390px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+
+#lstInfo tr td{
+  height: 37px;
+}
+
+
+.col-sm-2 control-label{
+  text-align: right;
+}
+
+textarea{
+  resize:none;
+  width:200px;
+  height:200px;
+}
