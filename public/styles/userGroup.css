@@ -1,0 +1,145 @@
+    * {
+    margin: 0;
+    padding: 0;
+}
+#header {
+    position: fixed;
+    background-color: #3979D8;
+    top: 0;
+    left: 0;
+    height: 47px;
+    width: 100%;
+    z-index:999;
+}
+#hLeft {
+    position: absolute;
+    line-height: 47px;
+    color: white;
+    left: 0;
+    z-index:999;
+}
+
+#hRight {
+    position: absolute;
+    line-height: 44px;
+    color: white;
+    right: 10px;
+}
+
+#top {
+    position: relative;
+    top: 47px;
+    background-color: #F6F7F7;
+    height: 25px;
+    width: 100%;
+    z-index: -1;
+}
+#content {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+#left {
+    position: absolute;
+    width:200px;
+    height: 100%;
+    background-color: #EEEEEE
+    /*opacity: 0.6;*/
+}
+#showGroup {
+  border:none;
+  outline:none;
+  background: none;
+  background-image: url("../images/icons/24/043-down-white.png");
+  background-color: "#3979D8";
+  width: 24px;
+  height:24px;
+  z-index:9999;
+}
+
+.adm {
+    position: absolute;
+    top: 115px;
+}
+
+.adm ul li{
+  height:30px;
+  width:200px;
+  line-height: :30px;
+  font-size:120%;
+  color:#666666;
+  cursor:default;
+}
+.adm img{
+  float:right;
+  margin:6px 10px 0 0;
+}
+
+.adm ul li:hover{
+    background-color: #AAC5EE;
+}
+
+
+#right {
+    position: absolute;
+    left: 17%;
+    height: 100%;
+}
+
+
+#describe{
+  position:absolute;
+  top:35px;
+  margin-left:40px;
+  font-size: 40;
+  font-weight: lighter;
+}
+
+#search-box{
+        position:absolute;
+        top:50px;
+        right:10px;
+        border:1px solid silver ;
+}
+
+#search-box:hover{
+  border:1px solid #3979D8;
+}
+  #search_value{
+    border:0;
+    width:300px;
+    height:25px;
+    line-height: 25px;
+    outline:none;
+    font-size: 18px;
+    margin-left:2px;
+    float:left;   /*让搜索框的大小完全匹配父div*/
+}
+
+  #search_button{
+    border:0;
+    outline:none;
+    background-image: url("../images/icons/24/047-search.png");
+    background-color: white;
+    width: 24px;
+    height:24px;
+    margin-right:4px;
+    float:left;
+  }
+
+  .infoHead{
+    width:330px;
+    color:#888888;
+    font-size: 13;
+    font-weight: bold;
+  }
+  .infoDetail{
+    color:#4D4D4D;
+    font-size: 14;
+  }
+
+  tbody tr:hover{
+    background-color: #F1F8FC;
+  }

@@ -38,6 +38,45 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     });
   });
 
+  app.get('/',function(req,res)
+  {
+    if (req.session.login!==true)
+    {
+      return res.render("login",{error: false,msg: ""});
+    }
+    let pn=Number(req.query.pageNumber) || 0;
+    let ps=Number(req.query.pageSize) || 10;
+    let cond={};
+    cond.Name=req.query.name || undefined;
+    if (cond.Name)
+    {
+      cond.Name=new RegExp(cond.Name,"gi");
+    }
+    else
+    {
+      delete cond.Name;
+    }
+    // console.log("======cond======: "+cond);
+    db.collection("Rights").find({}).toArray(function(err,list)
+    {
+      db.collection("Info").find(cond).sort({"WDate":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
+      {
+        db.collection("Info").count(cond,function(err,r)
+        {
+          res.render('index',{
+            listInfo: list2,
+            title: "HR 处罚管理系统",
+            records: r,
+            pageNumber: pn,
+            keyword: req.query.name || undefined,
+            pageSize: ps,
+            list: list});
+          });
+        });
+    });
+  });
+
+
   app.get('/userGroup',function(req,res){
     res.render("userGroup",{
       data:"Hello Stephanie"
@@ -60,7 +99,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     }
     db.collection("Rights").find({}).toArray(function(err,list)
     {
-      db.collection("Info").find(cond).skip(pn*ps).limit(ps).toArray(function(err,list2)
+      db.collection("Info").find(cond).sort({"WDate":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
       {
         db.collection("Info").count(cond,function(err,r)
         {
@@ -79,44 +118,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
   });
 
 
-  app.get('/',function(req,res)
-  {
-    if (req.session.login!==true)
-    {
-      return res.render("login",{error: false,msg: ""});
-    }
-    let pn=Number(req.query.pageNumber) || 0;
-    let ps=Number(req.query.pageSize) || 10;
-    let cond={};
-    cond.Name=req.query.name || undefined;
-    if (cond.Name)
-    {
-      cond.Name=new RegExp(cond.Name,"gi");
-    }
-    else
-    {
-      delete cond.Name;
-    }
-    //console.log(cond);
-    db.collection("Rights").find({}).toArray(function(err,list)
-    {
-      db.collection("Info").find(cond).skip(pn*ps).limit(ps).toArray(function(err,list2)
-      {
-        db.collection("Info").count(cond,function(err,r)
-        {
-          res.render('index',{
-            listInfo: list2,
-            title: "HR 处罚管理系统",
-            records: r,
-            pageNumber: pn,
-            keyword: req.query.name || undefined,
-            pageSize: ps,
-            list: list});
-          });
-        });
-    });
-  });
-
   app.post("/saveRights",function(req,res)
   {
     let json=req.body.toString();
@@ -129,7 +130,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         db.collection("Rights").insert(json[i]);
       }
     });
-    res.end("dddd");
+    res.end("You have saved rights succssfully!");
   });
 
   app.get("/download",function(req,res)
@@ -183,10 +184,9 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     var json=req.body.toString();
     var json=JSON.parse(json);
     var id=json._id;
-    // console.log(json);
     if (id.length===0)
     {
-      delete id;
+      delete json._id;
       db.collection("Info").insert(json,function(err,res)
       {
         if (err)
@@ -194,11 +194,11 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
           console.log(err.message);
         }
       });
-      return res.end("You have saved Info!");
+      return res.end("新增成功!");
     }
-     delete id;
+     delete json._id;
      db.collection("Info").update({_id: new ObjectId(id)},json);
-     res.end("You have saved Info!");
+     res.end("更新成功!");
   });
 
   app.post("/delInfo",function(req,res)

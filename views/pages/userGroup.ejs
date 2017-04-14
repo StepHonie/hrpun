@@ -1,0 +1,147 @@
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" context="IE=edge" ; charset="utf-8">
+    <link rel="stylesheet" href="/styles/userGroup.css">
+    <link rel="stylesheet" href="/libs/bootstrap/dist/css/bootstrap.min.css">
+    <script type="text/javascript" src="libs/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="/libs/bootstrap/dist//js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/userGroup.js"></script>
+    <script type="text/javascript" src="js/box.js"></script>
+    <title>
+        <%=data%>
+    </title>
+</head>
+
+<body>
+    <div id="header">
+        <div id="hLeft">
+            <span>"<"GroupName">"</span>
+            <div class="btn-group">
+                <button id="showGroup" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a href="#">功能</a>
+                    </li>
+                    <li>
+                        <a href="#">另一个功能</a>
+                    </li>
+                    <li>
+                        <a href="#">其他</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="#">分离的链接</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="hRight">
+            <img src="images/picture/avatar.png" style="width:30px;height:30px;vertical-align:middle;" alt="" />
+            <span>Stephanie Fang</span>
+        </div>
+    </div>
+    <div id="top"></div>
+    <div id="content">
+        <div id="left">
+            <img src="images/picture/jabil.png" style="width:120%;height:40px;margin-top:40px;position:absolute;">
+
+            <div class="adm">
+                <div id="admin">
+                    <span style="color:#666666;font-size:25px;text-align:center">Add Admin</span>
+                    <img id="addAdm" src="images/icons/24/001-add-blue.png" alt="">
+                </div>
+                <ul id="adm" style="margin-top:10px;">
+                    <li id="first">
+                        <span>Roberto</span>
+                        <img class="delAdm" style="display:none" src="images/icons/16/036-cancel.png">
+                    </li>
+                    <li id="second">
+                        <span>Laurence</span>
+                        <img class="delAdm" style="display:none" src="images/icons/16/036-cancel.png">
+                    </li>
+                    <li id="third">
+                        <span>Hardy</span>
+                        <img class="delAdm" style="display:none" src="images/icons/16/036-cancel.png">
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="right">
+          <div id="rightHead">
+            <div id="describe">Here is the Group Descriptions.</div>
+            <div id="search-box">
+                <form method="get" style="padding:0">
+                    <input id="search_value" type="text">
+                    <input id="search_button" type="submit" value="">
+                </form>
+            </div>
+            <hr style="margin:110px 0 0 50px;width:1000px;height:1px;border:2px;background-color:#D5D5D5;" />
+          </div>
+          <div id="rightTable">
+            <table border="0" cellspacing="0" cellpadding="0" style="margin-left:50px">
+                <!-- <caption></caption> -->
+                <thead class="thead">
+                    <tr style="height:30px" ;>
+                        <td><img id="boxPic" src="images/icons/24/038-add.png" style="width:21px;"></td>
+                        <td style="width:40px;"></td>
+                        <td class="infoHead" style="width:280px;">Name</td>
+                        <td class="infoHead">Title</td>
+                        <td class="infoHead">More Details</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="list" style="height:10px;">
+                        <td style="text-align:center;">
+                            <input type="checkbox" id="allBox">
+                        </td>
+                    </tr>
+                    <tr class="list" style="height:26px;">
+                        <td style="text-align:center;">
+                            <input type="checkbox" class="checkBox" style="margin-left:4px">
+                        </td>
+                        <td style="width:40px"></td>
+                        <td class="infoDetail">Stephanie</td>
+                        <td class="infoDetail">PA</td>
+                        <td class="infoDetail">Have granted Stephanie access/edit authority.</td>
+                    </tr>
+                    <tr class="list" style="height:26px;">
+                        <td style="text-align:center;">
+                            <input type="checkbox" class="checkBox" style="margin-left:4px">
+                        </td>
+                        <td style="width:40px"></td>
+                        <td class="infoDetail">Stephanie</td>
+                        <td class="infoDetail">PA</td>
+                        <td class="infoDetail">Have granted Stephanie access/edit authority.</td>
+                    </tr>
+                    <tr class="list" style="height:26px;">
+                        <td style="text-align:center;">
+                            <input type="checkbox" class="checkBox" style="margin-left:4px">
+                        </td>
+                        <td style="width:40px"></td>
+                        <td class="infoDetail">Stephanie</td>
+                        <td class="infoDetail">PA</td>
+                        <td class="infoDetail">Have granted Stephanie access/edit authority.</td>
+                    </tr>
+                </tbody>
+            </table>
+          </div>
+
+            <div id="rightPager">
+              <ul class="pagination">
+                  <li><a href="#">&laquo;</a></li>
+                  <li><a href="#">1</a></li>
+                  <li><a href="#">2</a></li>
+                  <li><a href="#">3</a></li>
+                  <li><a href="#">4</a></li>
+                  <li><a href="#">5</a></li>
+                  <li><a href="#">&raquo;</a></li>
+              </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

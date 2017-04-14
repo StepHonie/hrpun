@@ -8,7 +8,7 @@ $(function()
   $("#infoTable").find("tbody tr").bind("click",function(e)
   {
     // console.log($(this).find("td").eq(1).text());
-    let id=$(this).attr("oid");
+    var id=$(this).attr("oid");
     if (id==="")
     {
       return;
@@ -268,7 +268,6 @@ $(function()
               dataType: "text",
               success: function(res)
               {
-                //alert('click saveInfo');
                 alert(res);
                 location.href=location.href;
               }});
@@ -306,6 +305,5 @@ $(function()
     }
     $(".uuu").after("<span>...</span>");
   })();
-
 
 });
