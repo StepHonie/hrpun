@@ -1,27 +1,20 @@
 $(function()
 {
   var win=$(window);
-  var dlgRights=$('#dlgRights');
   var dlgEdit=$('#dlgEdit');
-  var dlgNoEdit=$("#dlgNoEdit");
+  var dlgSearch=$('#dlgSearch');
 
   $("#infoTable").find("tbody tr").bind("click",function(e)
   {
-    // console.log($(this).find("td").eq(1).text());
     var id=$(this).attr("oid");
-    if (id==="")
-    {
-      return;
-    }
-    // alert(id);
-    // alert($(this).find("td").eq(1).text());
+    if (id===""){return;}
     $.ajax({url:"/getDetails",
             type:"get",
             data:"id="+id,
             dataType: "Text",
             success: function(res)
             {
-              let pi=JSON.parse(res);
+              var pi=JSON.parse(res);
               $("#hdID").val(pi._id);
               $("#iptNum").val(pi.employeeNumber);
               $("#iptName").val(pi.Name);
@@ -45,7 +38,7 @@ $(function()
               $("#quality").val(pi.Quality),
               // $("#inputfile").val(<a href="/getAttachment?id=<%=listInfo[i]._id%>" target="_blank"><%=listInfo[i].extFilename%></a>),
               //$("#inputfile").hide();
-              $(".replaceable").replaceWith('<a class="replaceable" href="/getAttachment?id='+id+'" target="_blank">'+pi.extFilename+'</a>');
+              $(".replaceable").replaceWith('<a class="replaceable" href="/getAttachment?id='+id+'" target="_blank" style="display:block;width:90px;height:20px;overflow:hidden">'+pi.extFilename+'</a>');
               $("#hdFileContent").val(pi.Attachment || "");
               $("#txtArea").val(pi.TxtArea);
               dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px")});
@@ -54,34 +47,25 @@ $(function()
 
     $('#btnDel').unbind("click").bind('click',function(e)
     {
-      alert("you want to delete this Information?");
-
-      $.ajax({url:"/delInfo",
-             type: "post",
-             contentType: "application/octet-stream",
-             data: "id="+id,
-             dataType: "Text",
-             success: function(res)
-               {
-                 $("tr[oid='"+id+"']").remove();
-                 dlgEdit.hide();
-               }
-           })
-          //  .done(function(results{
-          //    if(results.success===1){
-          //      dlgEdit.hide();
-          //      $("tr[oid='"+id+"']").remove();
-          //    });
+      if(confirm("Are you sure want to delete it?")){
+        $.ajax({url:"/delInfo",
+               type: "post",
+               contentType: "application/octet-stream",
+               data: "id="+id,
+               dataType: "Text",
+               success: function(res)
+                 {
+                   $("tr[oid='"+id+"']").remove();
+                   dlgEdit.hide();
+                 }
+             });
+        }else{
+          dlgEdit.hide();
+        }
     });
-
   });
 
-  $('#btnCancel').bind('click',function(e)
-  {
-    dlgRights.hide();
-  });
-
-  $('#btnClose').bind('click',function(e)
+  $('.btnClose').bind('click',function(e)
   {
     dlgEdit.hide();
   });
@@ -90,120 +74,131 @@ $(function()
   {
     //重新打开时清空所有Input的值和textarea
     $("input").each(function()
-    {
-      $(this).val("");
-    });
+    {$(this).val("");});
     $("textarea").val("");
-
+    $(".replaceable").replaceWith('<p class="replaceable"></p>');
     dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/3+"px")});
     dlgEdit.show();
   });
 
-  // $('#btnRights').on('click',function(e)
-  // {
-  //
-    // dlgRights.css({"left":((win.width()-dlgRights.width())/2+"px"),
-    //          "top":((win.height()-dlgRights.height())/3+"px")});
-    // dlgRights.show();
-  // });
-
-
-  $('#btnDel').bind('click',function(e)
+  $('#btnSearch').bind('click',function(e)
   {
-    dlgEdit.hide();
+    dlgSearch.css({"left":345+"px","top":65+"px"});
+    dlgSearch.toggle();
   });
 
-
-
-  $('.btnClose').bind('click',function(e)
+  $('#upload').bind('click',function(e)
   {
-    dlgEdit.hide();
+    $('#iptCsv').trigger('click',e);
+    $('#iptCsv').on('change',function(e)
+    {
+      var file=$('#iptCsv')[0].files[0];
+      let fr=new FileReader;
+      fr.readAsArrayBuffer(file);
+      fr.onload=function(e)
+      {
+        var arraybuffer = fr.result;
+        var data = new Uint8Array(arraybuffer);
+        var arr = new Array();
+        for(var i = 0; i != data.length; ++i)
+        {
+          arr[i] = String.fromCharCode(data[i]);
+        }
+        var bstr = arr.join("");
+        var workbook = XLSX.read(bstr, {type:"binary"});
+        var first_sheet_name = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[first_sheet_name];
+        var info=XLSX.utils.sheet_to_json(worksheet,{header:1})
+        console.log(info);
+        $.ajax({url:"/uploadExcel",
+                type:"post",
+                contentType:"application/octet-stream",
+                data:JSON.stringify(info),
+                dataType:"text",
+                success: function(res)
+                {
+                  alert(res);
+                }
+              });
+      }
+    });
   });
 
-  function bindEvent()
-  {
-    $('.iptName').unbind("click").bind('click',function(e)
-    {
-      $(this).attr('contenteditable','true');
-      $(this).find('.spanDel').css('display','none');
-    }).unbind("click").bind('keydown',function(e)
-    {
-      if(e.keyCode==13)
-      {
-        $(this).attr('contenteditable','false');
-        $(this).find('.spanDel').css('display','none')
-      }
-    }).unbind("click").bind('mouseenter',function(e)
-    {
-      $(this).find('.spanDel').css('display','inline').unbind('click').bind('click',function(e)
-      {
-        $(this).parent().parent().remove();
-      });
-    }).unbind("click").bind('mouseleave',function(e)
-    {
-      $(this).find('.spanDel').css('display','none');
-    });
-
-    $('.checkImg').unbind('click').bind('click',function()
-    {
-      if($(this).attr("src")=="/images/icons/png/check.png")
-      {
-        $(this).attr("src","/images/icons/png/checked.png");
-      }
-      else
-      {
-        $(this).attr("src","/images/icons/png/check.png");
-      }
-    });
-  }
-  bindEvent();
-
-  // $('#addRights').bind('click',function()
+  // var foundData={};
+  // $('#advSearch').bind('click',function(e)
   // {
-  //   $('#lstRight').append("<tr><td class='iptName' contenteditable='false' style='width: 250px'>[New Name]<span class='spanDel' style='display:none'><img src='/images/icons/png/delete.png' style='float:right'></span></td><td><img class='checkImg' src='/images/icons/png/check.png' style='display:center'></td><td><img class='checkImg' src='/images/icons/png/check.png'></td></tr>");
-  //   bindEvent();
-  // });
+  //   var oob={employeeNumber:$('#advNum').val(),
+  //            Dep:$('#advDep').val(),
+  //            Plant:$('#advPlant').val(),
+  //            WDate:$('#advDate').val(),
+  //            Quality:$('#quality').val(),
+  //            ConType:$('#advCon').val()}
+  //   $.ajax({url:"/advSearch",
+  //           type:"post",
+  //           contentType:"application/octet-stream",
+  //           data:JSON.stringify(oob),
+  //           dataType:"text",
+  //           success:function(res){
+  //             foundData=JSON.parse(res);
+  //           }
+  //         });
+  //   });
 
-  // $('#saveRights').bind('click',function(e)
+  $(".cancel").bind('click',function() {
+    dlgSearch.hide();
+  });
+
+  //iptNum, getNum
+  // function bindEvent()
   // {
-  //   //alert('sldjf');
-  //   let tb=$("#lstRight");
-  //   let lines=tb.find("tr");
-  //   let list=new Array;
-  //   for (let i=0;i<lines.length;i++)
+  //   $('.iptName').unbind("click").bind('click',function(e)
   //   {
-  //     let o={user: lines.eq(i).find("td").eq(0).text(),
-  //            view: (lines.eq(i).find("td").eq(1).find("img").attr("src")==="/images/icons/png/check.png"?false:true),
-  //            edit: (lines.eq(i).find("td").eq(2).find("img").attr("src")==="/images/icons/png/check.png"?false:true)};
-  //     list.push(o);
-  //   }
-  //   $.ajax({url: "/saveRights",
-  //           type: "POST",
-  //           contentType: "application/octet-stream",
-  //           data: JSON.stringify(list),
-  //           dataType: "text",
-  //           success: function(res)
-  //           {
-  //             alert("Successfully");
-  //             dlgRights.hide();
-  //             //console.log(res);
-  //           }});
+  //     $(this).attr('contenteditable','true');
+  //     $(this).find('.spanDel').css('display','none');
+  //   }).unbind("click").bind('keydown',function(e)
+  //   {
+  //     if(e.keyCode==13)
+  //     {
+  //       $(this).attr('contenteditable','false');
+  //       $(this).find('.spanDel').css('display','none')
+  //     }
+  //   }).unbind("click").bind('mouseenter',function(e)
+  //   {
+  //     $(this).find('.spanDel').css('display','inline').unbind('click').bind('click',function(e)
+  //     {
+  //       $(this).parent().parent().remove();
+  //     });
+  //   }).unbind("click").bind('mouseleave',function(e)
+  //   {
+  //     $(this).find('.spanDel').css('display','none');
+  //   });
   //
-  // });
+  //   $('.checkImg').unbind('click').bind('click',function()
+  //   {
+  //     if($(this).attr("src")=="/images/icons/png/check.png")
+  //     {
+  //       $(this).attr("src","/images/icons/png/checked.png");
+  //     }
+  //     else
+  //     {
+  //       $(this).attr("src","/images/icons/png/check.png");
+  //     }
+  //   });
+  // }
+  // bindEvent();
 
-  $('#iptNum').keydown(function(e)
-  {
+  $('#iptNum').keydown(function(e){
     var num=$('#iptNum').val();
     var ev = document.all ? window.event : e;
     if(ev.keyCode==13)
     {
-       $.ajax({url: "/getNum",
+       $.ajax({
+       url: "/getNum",
        type: "get",
        data: "num="+num,
        dataType: "Text",
        success: function(res)
        {
-        //  console.log(res);
          var json=JSON.parse(res);
          if(json.error===true)
          {
@@ -225,13 +220,13 @@ $(function()
   $('#saveInfo').bind('click',function(e)
   {
     var file;
+    var fr=new FileReader;
+
     try{
       file=$("#inputfile")[0].files[0];
     }catch(e){
       file=undefined;
     }
-    var fr=new FileReader;
-    var infoList=new Array;
 
     fr.onload=function()
     {
@@ -256,31 +251,35 @@ $(function()
                EntryDate: $("#EntryDate").val(),
                PunType: $("#punType").val(),
                Quality: $("#quality").val(),
+               TxtArea: $("#txtArea").val(),
+               //
                Attachment: this.result || ($("#hdFileContent").val()===""?"":$("#hdFileContent").val()),
                extFilename: file.name || $(".replaceable").text(),
-               TxtArea: $("#txtArea").val()
+               operator:$("#username").text()
               };
-      infoList.push(obj);
+      // infoList.push(obj);
       $.ajax({url: "/saveInfo",
-              type: "POST",
+              type: "post",
               contentType: "application/octet-stream",
               data: JSON.stringify(obj),
               dataType: "text",
               success: function(res)
               {
-                alert(res);
                 location.href=location.href;
               }});
     };
+
     if (file===undefined)
     {
-      fr.result=undefined;
+      fr.result="";
       file={name: undefined};
-      return fr.onload();
+      return fr.onload();      //fr.onload()事件需要先加载，此才能调用；
     }
     fr.readAsDataURL(file);
   });
 
+
+  //Pager的相关操作
   (function()
   {
     let buttons=$(".page-button");
@@ -305,5 +304,14 @@ $(function()
     }
     $(".uuu").after("<span>...</span>");
   })();
+
+  //模拟点击 InputFile.
+  $('#btnFile').on('click',function(e){
+    $('#inputfile').trigger('click',e);
+    $('#inputfile').on('change',function(e){
+      var file=$('#inputfile')[0].files[0];
+      $('.replaceable').replaceWith('<a class="replaceable" style="display:block;width:70px;height:20px;overflow:hidden;">'+file.name+'</a>');
+    });
+  });
 
 });

@@ -9,9 +9,9 @@
     <!-- <link rel="stylesheet" type="text/css" href="/libs/bootstrap/dist/css/bootstrap-theme.min.css"> -->
     <link rel="stylesheet" href="/styles/layout.css">
 
-    <!-- <script type="text/javascript" src="/libs/jquery-3.1.0.js"></script> -->
     <script type="text/javascript" src="/libs/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script lang="javascript" src="/libs/xlsx.core.min.js"></script>
     <script type="text/javascript" src="/js/rights.js"></script>
     <style type="text/css">
         label {
@@ -52,28 +52,28 @@
 
 <body>
     <!-- Infomation display -->
-    <div style="padding:0 20px 1px 5px">
+    <div id="head" style="padding:0 20px 1px 5px">
         <h2 style="text-align: center">CTU奖惩管理系统</h2>
         <div class="row clearfix">
-            <div class="col-lg-4" style="margin-left:20px">
+            <div class="col-sm-3" style="margin-left:20px">
                 <form action="/" method="get">
                     <div class="input-group">
                         <input id="iptSearch" type="text" name="name" class="form-control">
-                        <span class="input-group-btn">
-                <button id="btnSearch" class="btn btn-primary" type="submit">Search</button>
-              </span>
+                        <span class="input-group-btn"><button id="btnSearch" class="btn btn-primary" type="button">高级查询</button></span>
                     </div>
                 </form>
             </div>
             <div style="margin-right:20px;float:right">
-                <a href="/download" target="_blank" id="download" class="btn btn-success">Download</a>
-                <button class="btn btn-primary" id="btnAdd" disable="true">Add</button>
-                <a id="btnRights" class="btn btn-danger" href="/userGroup" target="_blank">Rights</a>
+                <input id="iptCsv" type="file" style="display:none">
+                <button id="upload" class="btn btn-primary">上传</button>
+                <a href="/download" id="download" class="btn btn-success">下载</a>
+                <button class="btn btn-primary" id="btnAdd" disable="true">新增</button>
+                <a id="btnRights" class="btn btn-danger" href="/userGroup" target="_blank">权限</a>
             </div>
         </div>
     </div>
-    <div style="padding:10px 20px;">
-        <table class="table table-hover" id="infoTable">
+    <div id="tableForm" style="padding:10px 20px;">
+        <table class="table table-hover table-condensed" id="infoTable">
             <caption></caption>
             <thead>
                 <tr id='trHead'>
@@ -87,9 +87,9 @@
                 </tr>
             </thead>
             <tbody id="lstInfo">
-                <%for (let i=0;i<listInfo.length || i<pageSize;i++)
+                <%for (var i=0;i<listInfo.length || i<pageSize;i++)
                 {
-                  let x=listInfo[i];
+                  var x=listInfo[i];
                     x=x || {_id: "",
                              WDate: "",
                              Dep:"",
@@ -98,24 +98,24 @@
                              extFilename: "",
                              TxtArea: ""};
                 %>
-                    <tr oid="<%=x._id%>">
+                    <tr oid="<%=x._id%>" >
                         <td class='WDate' style="width:10%">
                             <%=x.WDate%>
                         </td>
                         <td class='Dep' style="width:10%">
                             <%=x.Dep%>
                         </td>
-                        <td class='Name' style="width:15%">
+                        <td class='Name' style="width:10%">
                             <%=x.Name%>
                         </td>
-                        <td class='Event' style="width:15%">
+                        <td class='Event' style="width:10%">
                             <%=x.Quality%>
                         </td>
-                        <td class='Details' style="width:40%">
-                            <%=x.TxtArea%>
+                        <td class='Details'>
+                            <p style="height:20px;width:650px;display:block;overflow:hidden"><%=x.TxtArea%></p>
                         </td>
-                        <td class='Attachment'>
-                            <a href="/getAttachment?id=<%=x._id%>" target="_blank">
+                        <td class='Attachment'style="width:100px">
+                            <a href="/getAttachment?id=<%=x._id%>" target="_blank" style="height:20px;width:80px;display:block;overflow:hidden;">
                                 <%=x.extFilename%>
                             </a>
                         </td>
@@ -124,59 +124,28 @@
             </tbody>
         </table>
     </div>
-    <div id="btnPage">
-        <%
-      var n=parseInt(records/pageSize);
-      n+=(records%pageSize===0?0:1);
-      for (var i=0;i<n;i++){
-      %>
-            <a href="/?pageNumber=<%=i%>&pageSize=<%=pageSize%><%=keyword?" &name="+keyword:" "%>" class="btn btn-primary page-button">
+    <div>
+      <div id="btnPage" style="width:500px">
+          <%
+            var n=parseInt(records/pageSize);
+            n+=(records%pageSize===0?0:1);
+            for (var i=0;i<n;i++){
+          %>
+              <a href="/advSearch?pageNumber=<%=i%>&pageSize=<%=pageSize%>" class="btn btn-primary page-button">
                 <%=(i+1)%>
-            </a>
-            <%}%>
+              </a>
+
+              <%}%>
+      </div>
     </div>
-    <!-- <div class="jsiPager"><%=pageNumber%>:<%=n%>:<%=pageSize%></div> -->
+
+    <!-- 此处为jsiPager -->
+    <div class="jsiPager"><%=pageNumber%>:<%=n%>:<%=pageSize%></div>
 </body>
 
-<!-- <div id="dlgRights" class="panel panel-success" style="display:none"> -->
-<!-- <div class="panel-heading">
-        Permissions
-        <img id="btnCancel" src="/images/icons/png/close.png" style="float:right">
-    </div>
-    <div class="panel-body">
-        <table id="rightsTable" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th style='width: 250px'>Name</th>
-                    <th>View</th>
-                    <th>Edit</th>
-                </tr>
-            </thead>
-            <tbody id="lstRight">
-                <%for (let i=0;i<list.length;i++)
-                {
-                  %>
-                    <tr>
-                        <td class='iptName' style='width: 250px' contenteditable="false">
-                            <%=list[i].user%><span class='spanDel' style='display:none'><img src='/images/icons/png/delete.png' style='float:right'></span></td>
-                        <td><img class='checkImg' src='<%=(list[i].view?"/images/icons/png/checked.png":"/images/icons/png/check.png")%>' style='display:center'></td>
-                        <td><img class='checkImg' src='<%=(list[i].edit?"/images/icons/png/checked.png":"/images/icons/png/check.png")%>'></td>
-                    </tr>
-                  <%
-                }%>
-            </tbody>
-        </table>
-    </div>
-    <div class="panel-footer" style="text-align: left;">
-        <img id="addRights" src="/images/icons/png/add.png">
-        <button id="saveRights" class="btn btn-success" style="float:right">Save</button>
-    </div>
-</div> -->
-<!-- More Details -->
-
 <div id="dlgEdit" class="panel panel-primary" style="display:none">
-    <div class="panel-heading" style="height:30px">
-        <div style="none">
+    <div class="panel-heading" style="padding:0;height:35px">
+        <div style="padding:7px 7px;">
             <span>Detail Informations</span>
             <img class="btnClose" src="/images/icons/png/close.png" style="float:right">
         </div>
@@ -248,12 +217,12 @@
                             <label class="col-sm-2 infoLabel">开出单位</label>
                             <div class="col-sm-2">
                                 <select id="selUnit" class="form-control">
-                                    <option value="1">安保</option>
-                                    <option value="2">安保(ADM)</option>
-                                    <option value="3">安保(FATP)</option>
-                                    <option value="4">EHS</option>
-                                    <option value="5">部门</option>
-                                    <option value="5">其他</option>
+                                    <option value="安保">安保</option>
+                                    <option value="安保(ADM)">安保(ADM)</option>
+                                    <option value="安保(FATP)">安保(FATP)</option>
+                                    <option value="EHS">EHS</option>
+                                    <option value="部门">部门</option>
+                                    <option value="其他">其他</option>
                                 </select>
                             </div>
                             <label class="col-sm-2 infoLabel">性质概述</label>
@@ -299,24 +268,25 @@
                                 </select>
                             </div>
                         </div>
-                        <label class="col-sm-2" style="width:14%;"> </label>
+                        <label class="col-sm-2" style="width:14%;">   </label>
                         <div class="col-sm-9 form-group">
                             <label class="col-sm-2 infoLeftLabel">处理状态</label>
                             <div class="col-sm-2">
                                 <select id="selStatus" class="form-control">
-                                    <option value="1">待处理</option>
-                                    <option value="2">已完成</option>
+                                    <option value="待处理">待处理</option>
+                                    <option value="已完成">已完成</option>
                                 </select>
                             </div>
                             <label class="col-sm-2 infoLabel">完成时间</label>
                             <div class="col-sm-2">
                                 <input id="FinishDate" type="date" class="form-control">
                             </div>
-                            <label class="col-sm-2 infoLabel">附件</label>
-                            <div class="form-group">
-                                <span class="replaceable"></span>
-                                <input id="inputfile" class="col-sm-2" type="file">
-                            </div>
+                              <label class="col-sm-2 infoLabel">附件</label>
+                              <div class="col-sm-2">
+                                  <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button>
+                                  <div class="col-sm-2" style="margin-top:8px;margin-left:3px;float:left;"><span class="replaceable"></span></div>
+                              </div>
+                              <input id="inputfile" type="file" style="display:none">
                         </div>
                     </div>
                     <div class="form-group">
@@ -344,9 +314,46 @@
         </div>
     </div>
     <div class="panel-footer">
-        <button id="btnDel" class="btn btn-danger" style="float:left;margin-bottom:10px;">Delete</button>
+        <button id="btnDel" class="btn btn-danger" style="float:left;margin-bottom:10px;" data-toggle="modal" data-target="#dlgDelete">Delete</button>
         <button id="saveInfo" class="btn btn-primary" style="float:right;margin-bottom:10px;">Save</button>
     </div>
+</div>
+
+<div id="dlgSearch" class="panel panel-info" style="display:none">
+  <form action="/advSearch" method="get">
+  <div class="panel-body" style="padding-bottom:0">
+          <div class="form-group">
+            <label style="width:56px">工 号</label>
+            <input name="advNum" type="text" style="width:100px">
+            <label style="width:56px">部 门</label>
+            <input name="advDep" type="text" style="width:100px">
+            <label style="width:56px">厂 别</label>
+            <input name="advPlant" type="text" style="width:100px">
+          </div>
+          <div class="form-group">
+            <label>违纪日期</label>
+            <input name="advDate" type="date" style="width:100px">
+            <label>违纪类型</label>
+            <select name="advQuality" style="width:100px;height:25px">
+                <option value="盗窃财物">盗窃财物</option>
+                <option value="怠忽工作">怠忽工作</option>
+                <option value="非吸烟区吸烟">非吸烟区吸烟</option>
+                <option value="管理失职">工作失职</option>
+                <option value="擅自离岗">擅自离岗</option>
+                <option value="不服从上级管理">不服从上级管理</option>
+                <option value="违反门禁规定">违反门禁规定</option>
+                <option value="违反作业规定">违反作业规定</option>
+                <option value="寻衅闹事">寻衅闹事</option>
+                <option value="违反考勤规定">违反考勤规定</option>
+                <option value="其他">其他</option>
+            </select>
+            <label>合同类型</label>
+            <input name="advCon" type="text" style="width:100px">
+          </div>
+  </div>
+    <button id="advSearch" type="submit" class="btn btn-primary" style="height:30px;float:right;margin-bottom:3px;margin-right:10px;">Search</button>
+  </form>
+
 </div>
 
 </html>

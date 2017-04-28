@@ -2,10 +2,11 @@ var express=require('express');
 var path=require('path');
 var radio=require('./Radio/radioForNode');
 var app=express();
-let session=require("express-session");
-let mongo=require("mongodb").MongoClient;
-let ObjectId=require("mongodb").ObjectID;
-let bodyParser=require("body-parser");
+var session=require("express-session");
+var mongo=require("mongodb").MongoClient;
+var ObjectId=require("mongodb").ObjectID;
+var bodyParser=require("body-parser");
+var ActiveDirectory=require('activedirectory');
 
 
 mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
@@ -24,129 +25,235 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   console.log("I'm listening port: 3000");
 
+  app.use((req,res,next)=>
+  {
+    if (req.url==="/" && req.method==="POST")
+    {
+      return next();
+    }
+    if (req.session.login!==true)
+    {
+      return res.render("login",{error: false,msg: ""});
+    }
+    return next();
+  });
+
   app.post("/",function(req,res)
   {
-    db.collection("Admin").find({username: req.body.username,password: req.body.password}).toArray(function(err,list)
-    {
-      if (err || list.length===0)
-      {
-        return res.render("login",{error: true,msg: "INVALID USER"});
+    var name=req.body.username;
+    var pwd=req.body.password;
+    var config={ url:'LDAP://cnctuc0dc10',
+                 baseDN: 'dc=corp,dc=jabil,dc=org',
+                 attribute: {user: ["*"]},
+                 username: "JABIL\\"+name,
+                 password: pwd }
+    var ad=new ActiveDirectory(config);
+    ad.authenticate(config.username,config.password,function(err,user){
+      if(err){
+        console.log('Error:',err);
+        res.render("login",{error:true,msg:"Username or password is wrong."});
+        return;
       }
-      req.session.login=true;
-      req.session.save();
-      res.redirect("/");
+      if(user){
+        db.collection("Admin").find({username: name}).toArray(function(err,list)
+        {
+          if (err || list.length===0)
+          {
+            return res.render("login",{error: true,msg: "INVALID USER"});
+          }
+          req.session.user=list[0];
+          req.session.login=true;
+          req.session.save();
+          res.redirect("/");
+        });
+      }else{
+        console.log("Authenticate failed");
+      }
     });
   });
 
   app.get('/',function(req,res)
   {
-    if (req.session.login!==true)
-    {
-      return res.render("login",{error: false,msg: ""});
-    }
-    let pn=Number(req.query.pageNumber) || 0;
-    let ps=Number(req.query.pageSize) || 10;
-    let cond={};
+    var pn=Number(req.query.pageNumber) || 0;
+    var ps=Number(req.query.pageSize) || 10;
+    var cond={};
     cond.Name=req.query.name || undefined;
-    if (cond.Name)
+    req.session.cond=req.session.cond || {};
+    if(cond.Name===undefined)
     {
-      cond.Name=new RegExp(cond.Name,"gi");
+      delete cond;
+    }else{
+      cond.Name={$regex: cond.Name, $options: 'i'};
+      req.session.cond=cond;
+      req.session.save();
     }
-    else
-    {
-      delete cond.Name;
-    }
-    // console.log("======cond======: "+cond);
-    db.collection("Rights").find({}).toArray(function(err,list)
-    {
-      db.collection("Info").find(cond).sort({"WDate":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
+    var data=req.session.cond;
+    console.log("查询条件(data):",data);
+      db.collection("history").find(data).sort({"createTime":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
       {
-        db.collection("Info").count(cond,function(err,r)
+        db.collection("history").count(data,function(err,r)
         {
           res.render('index',{
-            listInfo: list2,
+            user:req.session.user.name,
             title: "HR 处罚管理系统",
+            listInfo: list2,
             records: r,
             pageNumber: pn,
-            keyword: req.query.name || undefined,
-            pageSize: ps,
-            list: list});
+            pageSize: ps
           });
         });
-    });
+      });
   });
 
+  app.post('/uploadExcel',function(req,res){
+    var json=req.body.toString();
+    var data=JSON.parse(json);
+    console.log("data:",data);
+    // data.shfit();
+    // for (let item of data)
+    for(let i=1;i<data.length;i++)
+    {
+      let item=data[i];
+      let o={SerNum: item[0],
+             SDate: item[1],
+             Name: item[2],
+             employeeNumber: item[3],
+             Plant: item[4],
+             Dep: item[5],
+             TxtArea: item[6],
+             iptWDate: item[7],
+             Unit: item[8],
+             Quality: item[9],
+             Rule: item[10],
+             PunType: item[11],
+             EndDate: item[12],
+             Pos: item[13],
+             ConType: item[14],
+             JobType: item[15],
+             Tel: item[16],
+             Receiver: item[17],
+             GotDate: item[18],
+             Status: item[19],
+             FinishDate: item[20],
+             Officer: item[21],
+             Comments: item[22]};
+      db.collection("history").insert(o,function(err,res){
+        if(err) console.log(err.message)
+      });
+    }
+    return res.end("save successfully!");
+  });
+
+  app.get('/advSearch',function(req,res){
+    var pn=Number(req.query.pageNumber) || 0;
+    var ps=Number(req.query.pageSize) || 10;
+    var con={};
+    con.employeeNumber=req.query.advNum || undefined;
+    con.Dep=req.query.advDep || undefined;
+    con.Plant=req.query.advPlant || undefined;
+    con.WDate=req.query.advDate || undefined;
+    con.Quality=req.query.advQuality || undefined;
+    con.ConType=req.query.advCon || undefined;
+    req.session.con=req.session.con || {};
+
+    for (var n in con)
+    {
+      if (con[n]===undefined)
+      {
+        delete con[n];
+      }else{
+        req.session.con[n]=con[n];
+        req.session.save();
+      }
+    }
+    data=req.session.con;
+    console.log("查询条件:",con,req.session.con);
+    console.log("pn:"+pn+"=ps:"+ps);
+
+    db.collection("history").find(data).sort({"createTime":-1}).skip(pn*ps).limit(ps).toArray(function(err,list)
+    {
+      // console.log("查询数据：",list);
+      db.collection("history").count(data,function(err,n)
+      {
+        console.log("查询条数："+n);
+        res.render('index',{
+          title: "HR 处罚管理系统",
+          listInfo: list,
+          records: n,
+          pageNumber: pn,
+          pageSize: ps
+        });
+      });
+    });
+  });
 
   app.get('/userGroup',function(req,res){
     res.render("userGroup",{
-      data:"Hello Stephanie"
+      data:"Hello Stephanie",
     });
   });
 
+  // app.get('/normal',function(req,res)
+  // {
+  //   let pn=Number(req.query.pageNumber) || 0;
+  //   let ps=Number(req.query.pageSize) || 10;
+  //   let cond={};
+  //   cond.Name=req.query.name || undefined;
+  //   if (cond.Name)
+  //   {
+  //     cond.Name=new RegExp(cond.Name,"gi");
+  //   }else{
+  //     delete cond.Name;
+  //   }
+  //   db.collection("Rights").find({}).toArray(function(err,list)
+  //   {
+  //     db.collection("Info").find(cond).sort({"WDate":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
+  //     {
+  //       db.collection("Info").count(cond,function(err,r)
+  //       {
+  //         res.render('normal',{
+  //           listInfo: list2,
+  //           title: "HR 处罚管理系统",
+  //           records: r,
+  //           pageNumber: pn,
+  //           keyword: req.query.name || undefined,
+  //           pageSize: ps,
+  //           list: list
+  //           });
+  //         });
+  //       });
+  //   });
+  // });
 
-
-  app.get('/normal',function(req,res)
-  {
-    let pn=Number(req.query.pageNumber) || 0;
-    let ps=Number(req.query.pageSize) || 10;
-    let cond={};
-    cond.Name=req.query.name || undefined;
-    if (cond.Name)
-    {
-      cond.Name=new RegExp(cond.Name,"gi");
-    }else{
-      delete cond.Name;
-    }
-    db.collection("Rights").find({}).toArray(function(err,list)
-    {
-      db.collection("Info").find(cond).sort({"WDate":-1}).skip(pn*ps).limit(ps).toArray(function(err,list2)
-      {
-        db.collection("Info").count(cond,function(err,r)
-        {
-          res.render('normal',{
-            listInfo: list2,
-            title: "HR 处罚管理系统",
-            records: r,
-            pageNumber: pn,
-            keyword: req.query.name || undefined,
-            pageSize: ps,
-            list: list
-            });
-          });
-        });
-    });
-  });
-
-
-  app.post("/saveRights",function(req,res)
-  {
-    let json=req.body.toString();
-
-    json=JSON.parse(json);
-    db.collection("Rights").removeMany({},function()
-    {
-      for (let i=0;i<json.length;i++)
-      {
-        db.collection("Rights").insert(json[i]);
-      }
-    });
-    res.end("You have saved rights succssfully!");
-  });
+  // app.post("/saveRights",function(req,res)
+  // {
+  //   let json=req.body.toString();
+  //
+  //   json=JSON.parse(json);
+  //   db.collection("Rights").removeMany({},function()
+  //   {
+  //     for (let i=0;i<json.length;i++)
+  //     {
+  //       db.collection("Rights").insert(json[i]);
+  //     }
+  //   });
+  //   res.end("You have saved rights succssfully!");
+  // });
 
   app.get("/download",function(req,res)
   {
-    db.collection("Info").find({},{attachment: 0}).toArray(function(err,list)
+    var data=req.session.con;
+    console.log("data:",data);
+    db.collection("history").find(data,{attachment: 0}).toArray(function(err,list)
     {
       if(err)
       {
         return res.end(err.message);
       }
-      let buf="工号,姓名,电话,部门,违纪日期,受理日期,职务,奖惩条例,开出单位,厂别,处理状态,ER负责人,邮箱,完成时间,领取时间,领取人,合同类型,入职日期,处分类型,性质概述,违纪事宜简要";
+      var buf="工号,姓名,电话,部门,违纪日期,受理日期,职务,奖惩条例,开出单位,厂别,处理状态,ER负责人,邮箱,完成时间,领取时间,领取人,合同类型,入职日期,处分类型,性质概述,违纪事宜简要";
       buf="<table border='1'><thead><tr><td>"+buf.split(",").join("</td><td>");
       buf+="</td></tr></thead><tbody>";
-
-
-      for (let i=0;i<list.length;i++)
+      for (var i=0;i<list.length;i++)
       {
         buf+="<tr>";
         buf+="<td>"+list[i].employeeNumber+"</td>";
@@ -184,61 +291,62 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     var json=req.body.toString();
     var json=JSON.parse(json);
     var id=json._id;
+    var date=new Date();
     if (id.length===0)
     {
       delete json._id;
-      db.collection("Info").insert(json,function(err,res)
+      json.createTime=date;
+      json.updateTime=date;
+      db.collection("history").insert(json,function(err,res)
       {
-        if (err)
-        {
-          console.log(err.message);
-        }
+        if (err){console.log(err.message);}
       });
       return res.end("新增成功!");
+    }else{
+      delete json._id;
+      json.updateTime=date;
+      db.collection("history").update({_id: new ObjectId(id)},{$set: json});
+      res.end("更新成功!");
     }
-     delete json._id;
-     db.collection("Info").update({_id: new ObjectId(id)},json);
-     res.end("更新成功!");
+
   });
 
   app.post("/delInfo",function(req,res)
   {
     let url=require("querystring");
     let o=url.parse(req.body.toString());
-    db.collection("Info").remove({_id: new ObjectId(o.id)});
-    //console.log('you have deleted successfully');
+    db.collection("history").remove({_id: new ObjectId(o.id)});
     res.header("Content-Length","2");
     return res.end("OK");
   });
 
   app.get("/getAttachment",function(req,res)
   {
-    db.collection("Info").find({_id: new ObjectId(req.query.id)}).toArray(function(err,list)
+    db.collection("history").find({_id: new ObjectId(req.query.id)}).toArray(function(err,list)
     {
       if (err || list.length===0)
       {
         return res.end("{\"error\": true}");
       }
+      console.log(list[0].Attachment);
       let buf=list[0].Attachment.split(",")[1];
       buf=new Buffer(buf,"base64");
-      res.header("attachment","name="+list[0].extFilename);
+      res.header("Content-Disposition","attachment,filename="+list[0].extFilename);
       return res.end(buf);
     });
   });
 
   app.get("/getDetails",function(req,res)
   {
-    db.collection("Info").find({_id: new ObjectId(req.query.id)}).toArray(function(err,list)
+    db.collection("history").find({_id: new ObjectId(req.query.id)}).toArray(function(err,list)
     {
       if(err || list.length===0)
       {
         return res.end("{\"error\":true}");
       }
       return res.end(JSON.stringify(list[0]));
-      //console.log("The id of this item is: "+list[0]._id);
     });
   });
-
 
   app.get("/getNum",function(req,res)
   {
@@ -278,5 +386,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         console.log(e);
     });
   });
+
   app.listen(3000);
+
 });
