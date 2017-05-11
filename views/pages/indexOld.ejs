@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="/libs/bootstrap/dist/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/libs/bootstrap/dist/css/bootstrap-theme.min.css"> -->
+    <link rel="stylesheet" href="/styles/layout.css">
+
+    <script type="text/javascript" src="/libs/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script lang="javascript" src="/libs/xlsx.core.min.js"></script>
+    <script type="text/javascript" src="/js/rights.js"></script>
+    <style type="text/css">
+        label {
+            padding-top: 7px;
+        }
+
+        label.infoLeftLabel {
+            width: 11%;
+        }
+
+        label.infoLabel {
+            padding-left: 20px;
+            width: 12%;
+        }
+
+        label.infoHead {
+            /*border: 1px solid yellow;*/
+            width: 14%;
+            text-align: center;
+            padding-top: 0;
+            color:#999999;
+            font-size:20px;
+        }
+        .form-group {
+          margin-bottom: 12px;
+        }
+
+        .col-sm-2 {
+            /*width:7%;*/
+            padding-left: 0;
+            padding-right: 0;
+        }
+    </style>
+    <title>
+        <%=title%>
+    </title>
+</head>
+
+<body>
+    <!-- Infomation display -->
+    <div id="head" style="padding:0 20px 1px 5px">
+        <h2 style="text-align: center">CTU奖惩管理系统</h2>
+        <div class="row clearfix">
+            <div class="col-sm-3" style="margin-left:20px">
+                <form action="/" method="get">
+                    <div class="input-group">
+                        <input id="iptSearch" type="text" name="name" class="form-control">
+                        <span class="input-group-btn"><button id="btnSearch" class="btn btn-primary" type="button">高级查询</button></span>
+                    </div>
+                    <div id="dlgSearch" class="panel panel-info" style="display:none">
+                      <!-- <form action="/advSearch" method="get"> -->
+                        <div class="panel-body" style="padding-bottom:0">
+                                <div class="form-group">
+                                  <label style="width:56px">工 号</label>
+                                  <input name="advNum" type="text" style="width:100px">
+                                  <label style="width:56px">部 门</label>
+                                  <input name="advDep" type="text" style="width:100px">
+                                  <label style="width:56px">厂 别</label>
+                                  <input name="advPlant" type="text" style="width:100px">
+                                </div>
+                                <div class="form-group">
+                                  <label>违纪日期</label>
+                                  <input name="advDate" type="date" style="width:100px">
+                                  <label>违纪类型</label>
+                                  <select name="advQuality" style="width:100px;height:25px">
+                                      <option value="" style="display:none"></option>
+                                      <option value="盗窃财物">盗窃财物</option>
+                                      <option value="怠忽工作">怠忽工作</option>
+                                      <option value="非吸烟区吸烟">非吸烟区吸烟</option>
+                                      <option value="管理失职">工作失职</option>
+                                      <option value="擅自离岗">擅自离岗</option>
+                                      <option value="不服从上级管理">不服从上级管理</option>
+                                      <option value="违反门禁规定">违反门禁规定</option>
+                                      <option value="违反作业规定">违反作业规定</option>
+                                      <option value="寻衅闹事">寻衅闹事</option>
+                                      <option value="违反考勤规定">违反考勤规定</option>
+                                      <option value="其他">其他</option>
+                                  </select>
+                                  <label>合同类型</label>
+                                  <input name="advCon" type="text" style="width:100px">
+                                </div>
+                        </div>
+                        <button id="advSearch" type="submit" class="btn btn-primary" style="height:30px;float:right;margin-bottom:3px;margin-right:10px;">Search</button>
+                      <!-- </form> -->
+                    </div>
+                </form>
+            </div>
+            <div style="margin-right:20px;float:right">
+                <input id="iptCsv" type="file" style="display:none">
+                <button id="upload" class="btn btn-primary">上传</button>
+                <a href="/download" id="download" class="btn btn-success">下载</a>
+                <button class="btn btn-primary" id="btnAdd" disable="true">新增</button>
+                <a id="btnRights" class="btn btn-danger" href="/userGroup" target="_blank">权限</a>
+            </div>
+        </div>
+    </div>
+    <div id="tableForm" style="padding:10px 20px;">
+        <table class="table table-hover table-condensed" id="infoTable">
+            <caption></caption>
+            <thead>
+                <tr id='trHead'>
+                    <!-- <th type="hidden">ID</th> -->
+                    <th>Date</th>
+                    <th>Department</th>
+                    <th>Name</th>
+                    <th>Event</th>
+                    <th>Details</th>
+                    <th>Attachment</th>
+                </tr>
+            </thead>
+            <tbody id="lstInfo">
+                <%for (var i=0;i<listInfo.length || i<pageSize;i++)
+                {
+                  var x=listInfo[i];
+                    x=x || {_id: "",
+                             WDate: "",
+                             Dep:"",
+                             Name: "",
+                             Quality: "",
+                             extFilename: "",
+                             TxtArea: ""};
+                %>
+                    <tr oid="<%=x._id%>" >
+                        <td class='WDate' style="width:10%">
+                            <%=x.WDate%>
+                        </td>
+                        <td class='Dep' style="width:10%">
+                            <%=x.Dep%>
+                        </td>
+                        <td class='Name' style="width:10%">
+                            <%=x.Name%>
+                        </td>
+                        <td class='Event' style="width:10%">
+                            <%=x.Quality%>
+                        </td>
+                        <td class='Details'>
+                            <p style="height:20px;width:650px;display:block;overflow:hidden"><%=x.TxtArea%></p>
+                        </td>
+                        <td class='Attachment'style="width:100px">
+                            <a href="/getAttachment?id=<%=x._id%>" target="_blank" style="height:20px;width:80px;display:block;overflow:hidden;">
+                                <%=x.extFilename%>
+                            </a>
+                        </td>
+                    </tr>
+                    <%}%>
+            </tbody>
+        </table>
+    </div>
+    <div>
+      <ul id="btnPage" class="pagination pagination-md" style="width:500px">
+          <%
+          var n=parseInt(records/pageSize);
+          n+=(records%pageSize===0?0:1);
+          %>
+          <!-- <li class="pageBlock"><a href="?pageNumber=<%=i-1%>&pageSize=<%=pageSize%>">&laquo;</a></li> -->
+          <%for (var i=0;i<n;i++){%>
+              <!-- <a href="/?pageNumber=<%=i-1%>&pageSize=<%=pageSize%>" class="btn btn-primary page-button">
+                <%=(i+1)%>
+              </a> -->
+              <li><a href="/?pageNumber=<%=i%>&pageSize=<%=pageSize%>" class="page-button">
+                <%=(i+1)%>
+              </a></li>
+          <%}%>
+          <!-- <li class="pageBlock"><a href="?pageNumber=<%=i+1%>&pageSize=<%=pageSize%>">&raquo;</a></li> -->
+
+      </ul>
+    </div>
+    <div class="jsiPager"><%=pageNumber%>:<%=n%>:<%=pageSize%></div>
+</body>
+
+<div id="dlgEdit" class="panel panel-primary" style="display:none">
+    <div class="panel-heading" style="padding:0;height:35px">
+        <div style="padding:7px 7px;">
+            <span>Detail Informations</span>
+            <img class="btnClose" src="/images/icons/png/close.png" style="float:right">
+        </div>
+    </div>
+    <div class="panel-body" >
+        <div class="container">
+            <div class="row">
+                <form id="frmInfo" class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 infoHead">受理日期</label>
+                        <div class="col-sm-2">
+                            <input id="iptSDate" class="form-control" type="date">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 infoHead">员工信息</label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">工号</label>
+                            <div class="col-sm-2">
+                                <input id="iptNum" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">姓 名</label>
+                            <div class="col-sm-2">
+                                <input id="iptName" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">联系电话</label>
+                            <div class="col-sm-2">
+                                <input id="iptTel" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="width:14%;">    </label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">部门</label>
+                            <div class="col-sm-2">
+                                <input id="iptDep" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">厂别</label>
+                            <div class="col-sm-2">
+                                <input id="iptPlant" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">邮箱</label>
+                            <div class="col-sm-2">
+                                <input id="iptEmail" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="width:14%;"> </label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">职务</label>
+                            <div class="col-sm-2">
+                                <input id="iptPos" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">入职日期</label>
+                            <div class="col-sm-2">
+                                <input id="EntryDate" type="date" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">合同类型</label>
+                            <div class="col-sm-2">
+                                <input id="contractType" type="text" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 infoHead">违纪信息</label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">违纪日期</label>
+                            <div class="col-sm-2">
+                                <input id="iptWDate" type="date" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">开出单位</label>
+                            <div class="col-sm-2">
+                                <select id="selUnit" class="form-control">
+                                    <option value="安保">安保</option>
+                                    <option value="安保(ADM)">安保(ADM)</option>
+                                    <option value="安保(FATP)">安保(FATP)</option>
+                                    <option value="EHS">EHS</option>
+                                    <option value="部门">部门</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <label class="col-sm-2 infoLabel">性质概述</label>
+                            <div class="col-sm-2">
+                                <select id="quality" class="form-control">
+                                    <option value="盗窃财物">盗窃财物</option>
+                                    <option value="怠忽工作">怠忽工作</option>
+                                    <option value="非吸烟区吸烟">非吸烟区吸烟</option>
+                                    <option value="管理失职">工作失职</option>
+                                    <option value="擅自离岗">擅自离岗</option>
+                                    <option value="不服从上级管理">不服从上级管理</option>
+                                    <option value="违反门禁规定">违反门禁规定</option>
+                                    <option value="违反作业规定">违反作业规定</option>
+                                    <option value="寻衅闹事">寻衅闹事</option>
+                                    <option value="违反考勤规定">违反考勤规定</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="width:14%;"> </label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">违纪内容</label>
+                            <div class="col-sm-9" style="padding-left:0">
+                                <textarea id="txtArea" class="form-control" rows="2" resize:none></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 infoHead">处罚结果</label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">奖惩条例</label>
+                            <div class="col-sm-2">
+                                <input id="iptRule" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">处分类型</label>
+                            <div class="col-sm-4" style="padding-left:0;padding-right:0">
+                                <select id="punType" class="form-control">
+                                    <option value="口头警告">口头警告</option>
+                                    <option value="书面警告">书面警告</option>
+                                    <option value="严重书面警告">严重书面警告</option>
+                                    <option value="回劳务公司">退回劳务公司</option>
+                                    <option value="立即解除劳动合同">立即解除劳动合同</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="width:14%;">   </label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">处理状态</label>
+                            <div class="col-sm-2">
+                                <select id="selStatus" class="form-control">
+                                    <option value="待处理">待处理</option>
+                                    <option value="已完成">已完成</option>
+                                </select>
+                            </div>
+                            <label class="col-sm-2 infoLabel">完成时间</label>
+                            <div class="col-sm-2">
+                                <input id="FinishDate" type="date" class="form-control">
+                            </div>
+                              <label class="col-sm-2 infoLabel">附件</label>
+                              <div class="col-sm-2">
+                                  <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button>
+                                  <div class="col-sm-2" style="margin-top:8px;margin-left:3px;float:left;"><span class="replaceable"></span></div>
+                              </div>
+                              <input id="inputfile" type="file" style="display:none">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 infoHead">相关人员</label>
+                        <div class="col-sm-9 form-group">
+                            <label class="col-sm-2 infoLeftLabel">ER负责人</label>
+                            <div class="col-sm-2">
+                                <input id="iptOfficer" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">领取人</label>
+                            <div class="col-sm-2">
+                                <input id="receiver" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">领取时间</label>
+                            <div class="col-sm-2">
+                                <input id="GotDate" type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="hdID" />
+                    <input type="hidden" id="hdFileContent" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <button id="btnDel" class="btn btn-danger" style="float:left;margin-bottom:10px;" data-toggle="modal" data-target="#dlgDelete">Delete</button>
+        <button id="saveInfo" class="btn btn-primary" style="float:right;margin-bottom:10px;">Save</button>
+    </div>
+</div>
+
+
+
+</html>

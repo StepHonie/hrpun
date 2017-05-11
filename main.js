@@ -422,7 +422,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.get("/getNum",function(req,res)
   {
-    var runner=new radio.Runner("cnctug0weboa01",5521,function()
+    var runner=new radio.Runner("cnctug0sysc01",5521,function()
     {
         runner.run({delegation: function(o)
                     {
