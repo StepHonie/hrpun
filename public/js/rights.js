@@ -3,6 +3,53 @@ $(function()
   var win=$(window);
   var dlgEdit=$('#dlgEdit');
   var dlgSearch=$('#dlgSearch');
+  var dlgPer=$('#dlgPer');
+
+  //Pager的相关操作
+  (function()
+  {
+    let buttons=$(".page-button");
+    if (buttons.length<=10)
+    {
+      return $(".jsiPager").remove();
+    }
+    let s=$(".jsiPager").text();
+    s=s.split(":");
+    $(".jsiPager").remove();
+    let pageNumber=Number(s[0]);
+    let nPages=Number(s[1]);
+    let pageSize=Number(s[2]);
+    for (let i=3;i<nPages-3;i++)
+    {
+      if (Math.abs(pageNumber-i)<2)
+      {
+        continue;
+      }
+      buttons.eq(i).parent().prev().find("a").addClass("uuu");
+      buttons.eq(i).parent().remove();
+    }
+    $(".uuu").after("<span>...</span>");
+  })();
+
+  $('#adm li').hover
+  (
+    function(){
+      this.childNodes[3].style.display="block";
+    },
+    function(){
+      this.childNodes[3].style.display="none";
+    }
+  );
+
+  $('#perTable tbody tr').hover
+  (
+    function(){
+      this.childNodes[7].childNodes[1].style.display="block";
+    },
+    function(){
+      this.childNodes[7].childNodes[1].style.display="none";
+    }
+  );
 
   $("#infoTable").find("tbody tr").bind("click",function(e)
   {
@@ -41,13 +88,14 @@ $(function()
               $(".replaceable").replaceWith('<a class="replaceable" href="/getAttachment?id='+id+'" target="_blank" style="display:block;width:90px;height:20px;overflow:hidden">'+pi.extFilename+'</a>');
               $("#hdFileContent").val(pi.Attachment || "");
               $("#txtArea").val(pi.TxtArea);
-              dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px")});
+              dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/2+"px")});
               dlgEdit.show();
             }});
 
     $('#btnDel').unbind("click").bind('click',function(e)
     {
-      if(confirm("Are you sure want to delete it?")){
+      if(confirm("Are you sure want to delete it?"))
+      {
         $.ajax({url:"/delInfo",
                type: "post",
                contentType: "application/octet-stream",
@@ -58,17 +106,16 @@ $(function()
                    $("tr[oid='"+id+"']").remove();
                    dlgEdit.hide();
                  }
-             });
+               });
         }else{
           dlgEdit.hide();
         }
+      });
     });
-  });
 
-  $('.btnClose').bind('click',function(e)
-  {
-    dlgEdit.hide();
-  });
+  $('.btnClose').bind('click',function(e){dlgEdit.hide();});
+
+  $('#closePer').bind('click',function(e){dlgPer.hide()});
 
   $('#btnAdd').bind('click',function(e)
   {
@@ -77,13 +124,13 @@ $(function()
     {$(this).val("");});
     $("textarea").val("");
     $(".replaceable").replaceWith('<p class="replaceable"></p>');
-    dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/3+"px")});
+    dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/2+"px")});
     dlgEdit.show();
   });
 
   $('#btnSearch').bind('click',function(e)
   {
-    dlgSearch.css({"left":345+"px","top":65+"px"});
+    dlgSearch.css({"right":15+"px","top":60+"px"});
     dlgSearch.toggle();
   });
 
@@ -117,103 +164,42 @@ $(function()
                 dataType:"text",
                 success: function(res)
                 {
-                  alert(res);
+                  // alert(res);
+                  location.href=location.href;
                 }
               });
       }
     });
   });
 
-  // var foundData={};
-  // $('#advSearch').bind('click',function(e)
-  // {
-  //   var oob={employeeNumber:$('#advNum').val(),
-  //            Dep:$('#advDep').val(),
-  //            Plant:$('#advPlant').val(),
-  //            WDate:$('#advDate').val(),
-  //            Quality:$('#quality').val(),
-  //            ConType:$('#advCon').val()}
-  //   $.ajax({url:"/advSearch",
-  //           type:"post",
-  //           contentType:"application/octet-stream",
-  //           data:JSON.stringify(oob),
-  //           dataType:"text",
-  //           success:function(res){
-  //             foundData=JSON.parse(res);
-  //           }
-  //         });
-  //   });
+  $(".cancel").bind('click',function() {dlgSearch.hide();});
 
-  $(".cancel").bind('click',function() {
-    dlgSearch.hide();
-  });
-
-  //iptNum, getNum
-  // function bindEvent()
-  // {
-  //   $('.iptName').unbind("click").bind('click',function(e)
-  //   {
-  //     $(this).attr('contenteditable','true');
-  //     $(this).find('.spanDel').css('display','none');
-  //   }).unbind("click").bind('keydown',function(e)
-  //   {
-  //     if(e.keyCode==13)
-  //     {
-  //       $(this).attr('contenteditable','false');
-  //       $(this).find('.spanDel').css('display','none')
-  //     }
-  //   }).unbind("click").bind('mouseenter',function(e)
-  //   {
-  //     $(this).find('.spanDel').css('display','inline').unbind('click').bind('click',function(e)
-  //     {
-  //       $(this).parent().parent().remove();
-  //     });
-  //   }).unbind("click").bind('mouseleave',function(e)
-  //   {
-  //     $(this).find('.spanDel').css('display','none');
-  //   });
-  //
-  //   $('.checkImg').unbind('click').bind('click',function()
-  //   {
-  //     if($(this).attr("src")=="/images/icons/png/check.png")
-  //     {
-  //       $(this).attr("src","/images/icons/png/checked.png");
-  //     }
-  //     else
-  //     {
-  //       $(this).attr("src","/images/icons/png/check.png");
-  //     }
-  //   });
-  // }
-  // bindEvent();
-
-  $('#iptNum').keydown(function(e){
+  $('#iptNum').keydown(function(e)
+  {
     var num=$('#iptNum').val();
     var ev = document.all ? window.event : e;
     if(ev.keyCode==13)
     {
-       $.ajax({
-       url: "/getNum",
-       type: "get",
-       data: "num="+num,
-       dataType: "Text",
-       success: function(res)
-       {
-         var json=JSON.parse(res);
-         if(json.error===true)
-         {
-           alert("请输入正确的工号!");
-           return;
-         }
-         var pi=json.list[0];
-
-         $("#iptName").val(pi.name);
-         $("#iptTel").val(pi.telephoneNumber);
-         $("#iptDep").val(pi.department);
-         $("#iptPos").val(pi.title);
-         $("#iptPlant").val(pi.company);
-         $("#iptEmail").val(pi.mail);
-       }});
+     $.ajax({url: "/getNum",
+             type: "get",
+             data: "num="+num,
+             dataType: "Text",
+             success: function(res)
+             {
+               var json=JSON.parse(res);
+               if(json.error===true)
+               {
+                 alert("请输入正确的工号!");
+                 return;
+               }
+               $("#iptName").val(json.name);
+               $("#iptTel").val(json.telephoneNumber);
+               $("#iptDep").val(json.department);
+               $("#iptPos").val(json.title);
+               $("#iptPlant").val(json.company);
+               $("#iptEmail").val(json.mail);
+             }
+           });
     }
   });
 
@@ -221,13 +207,11 @@ $(function()
   {
     var file;
     var fr=new FileReader;
-
     try{
       file=$("#inputfile")[0].files[0];
     }catch(e){
       file=undefined;
     }
-
     fr.onload=function()
     {
       var obj={_id: $("#hdID").val(),
@@ -251,8 +235,7 @@ $(function()
                EntryDate: $("#EntryDate").val(),
                PunType: $("#punType").val(),
                Quality: $("#quality").val(),
-               TxtArea: $("#txtArea").val(),
-               //
+               TxtArea: $("#txtArea").val(),               //
                Attachment: this.result || ($("#hdFileContent").val()===""?"":$("#hdFileContent").val()),
                extFilename: file.name || $(".replaceable").text(),
                operator:$("#username").text()
@@ -278,40 +261,82 @@ $(function()
     fr.readAsDataURL(file);
   });
 
-
-  //Pager的相关操作
-  (function()
+  $('#btnFile').on('click',function(e)
   {
-    let buttons=$(".page-button");
-    if (buttons.length<=10)
-    {
-      return $(".jsiPager").remove();
-    }
-    let s=$(".jsiPager").text();
-    s=s.split(":");
-    $(".jsiPager").remove();
-    let pageNumber=Number(s[0]);
-    let nPages=Number(s[1]);
-    let pageSize=Number(s[2]);
-    for (let i=3;i<nPages-3;i++)
-    {
-      if (Math.abs(pageNumber-i)<2)
-      {
-        continue;
-      }
-      buttons.eq(i).prev().addClass("uuu");
-      buttons.eq(i).remove();
-    }
-    $(".uuu").after("<span>...</span>");
-  })();
-
-  //模拟点击 InputFile.
-  $('#btnFile').on('click',function(e){
     $('#inputfile').trigger('click',e);
     $('#inputfile').on('change',function(e){
       var file=$('#inputfile')[0].files[0];
       $('.replaceable').replaceWith('<a class="replaceable" style="display:block;width:70px;height:20px;overflow:hidden;">'+file.name+'</a>');
     });
   });
+
+  $('#btnPer').on('click',function(e)
+  {
+    dlgPer.css({"left":((win.width()-dlgPer.width())/2+"px"),"top":((win.height()-dlgPer.height())/2+"px")});
+    dlgPer.show();
+  });
+
+  $('#addAdm').on('click',function(e)
+  {
+    let num=prompt("Please enter Employee Number...");
+    $.ajax({url:"/getNum",
+            type: "get",
+            data: "num="+num+"&role="+"mgr",
+            dataType: "Text",
+            success: function(res)
+            {
+              var json=JSON.parse(res);
+              if(json.error===true)
+              {
+                alert(json.content);
+                return;
+              }
+              $('#adm').append('<li><span>'+json.name+'</span><img class="delAdm" src="images/icons/16/036-cancel.png"></li>');
+            }
+          });
+  });
+
+  $('#addUser').on('click',function(e)
+  {
+    let num=prompt("Please enter Employee Number...");
+    $.ajax({url:"/getNum",
+            type: "get",
+            data: "num="+num+"&role="+"user",
+            dataType: "Text",
+            success: function(res)
+            {
+              var json=JSON.parse(res);
+              if(json.error===true)
+              {
+                alert(json.content);
+                return;
+              }
+              $("#tbUser").append('<tr><td>'+json.name+'</td><td>'+json.title+'</td><td>'+json.department+'</td><td><img style="display:none" src="/images/icons/png/close.png"></td><tr>');
+            }
+          });
+  });
+
+  $('.perDel').on('click',function(e)
+  {
+    let that=this;
+    let id=$(this).attr("pid");
+    let pt=$(this).attr("perType");
+    $.ajax({url:"/delPer",
+            type: "post",
+            data: "id="+id,
+            dataType: "Text",
+            success:function(res)
+            {
+              if(pt==="adm")
+              {
+                $(that).parent().remove();
+              }else{
+                $(that).parent().parent().remove();
+              }
+            }
+            });
+  });
+
+
 
 });

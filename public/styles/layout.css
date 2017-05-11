@@ -22,10 +22,13 @@
   box-shadow: 0px 0px 4px #000;
 }
 
+.a-btn {
+  cursor: default;
+}
 
 #btnPage{
   bottom: 0;
-  width: 390px;
+  /*width: 390px;*/
   margin: 0 auto;
   text-align: center;
 }
@@ -35,6 +38,10 @@
   height: 37px;
 }
 
+#btnPage li.active {
+  background-color: #4CAF50;
+  color: white;
+}
 
 .col-sm-2 control-label{
   text-align: right;
@@ -52,4 +59,57 @@ textarea{
   width:45px;
   height:27px;
   border:1px solid blue;
+}
+
+#adm{
+  padding:0px 4px;
+}
+
+#adm li {
+  padding:5px;
+  list-style: none;
+}
+
+#adm li:hover{
+  background-color: #AAC5EE;
+}
+
+#adm img{
+  float:right;
+  margin-top:5px;
+  display:none;
+}
+
+#adm span{
+  font-size:15px;
+  color:#6F6F6F;
+}
+
+#perTable thead tr {
+  height:8px;
+  border-bottom: 2px solid #A4CAE3;
+}
+
+#perTable td {
+  height:30px;
+  text-align: center;
+}
+
+#perTable thead td {
+  width:330px;
+  color:#888888;
+  font-size: 20;
+  font-weight: bold;
+  width:140px;
+}
+
+
+#perTable tbody tr:hover {
+  background-color: #F1F8FC;
+}
+
+#perTable tbody img{
+  float:right;
+  margin-right:20px;
+  display:none;
 }
