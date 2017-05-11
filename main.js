@@ -9,6 +9,22 @@ var bodyParser=require("body-parser");
 var ActiveDirectory=require('activedirectory');
 let url=require("querystring");
 
+
+function GetProName(n)
+{
+  let o={"name": "Name",
+         "advDep" :  "Dep",
+         "advPlant" : "Plant",
+         "advNum" : "employeeNumber",
+         "advDate" : "WDate",
+         "advQuality" : "Quality",
+         "advCon" : "ConType"}
+  return o[n] || n;
+}
+
+
+
+
 mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 {
   if (err)
@@ -42,6 +58,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
   {
     var name=req.body.username;
     var pwd=req.body.password;
+    // cnctuc0dc10
     var config={ url:'LDAP://cnctuc0dc10',
                  baseDN: 'dc=corp,dc=jabil,dc=org',
                  attribute: {user: ["*"]},
@@ -85,19 +102,19 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     var con={};
     //除了Pager传来的查询，其它的人名或高级查询都要对session.con进行清空
     if(req.query.name!==undefined) req.session.con={};
-    if(req.query.name===undefined)
+    if(req.query.name===undefined || req.query.name==="")
     {
       con.Name=undefined;
     }else{
       con.Name=new RegExp(`.*${req.query.name}.*`,"ui");
     }
-    if(req.query.advDep===undefined)
+    if(req.query.advDep===undefined || req.query.advDep==="")
     {
       con.Dep=undefined;
     }else{
       con.Dep=new RegExp(`.*${req.query.advDep}.*`,"ui");
     }
-    if(req.query.advPlant===undefined)
+    if(req.query.advPlant===undefined || req.query.advPlant==="")
     {
       con.Plant=undefined;
     }else{
@@ -241,14 +258,26 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.get("/download",function(req,res)
   {
+    let data;
     if(req.session.user.role==="user")
     {
-      var data={"Dep":req.session.user.Department};
+      data={"Dep":req.session.user.Department};
     }else{
-      var data=req.session.con;
+      data=req.query;
     }
-    // console.log("+++++++++++data++++++++++++:",data);
-    db.collection("Information").find(data,{attachment: 0}).toArray(function(err,list)
+    let keys=Object.keys(data);
+    let cond=new Object;
+    for (let n of keys)
+    {
+      if (data[n]==="")
+      {
+        delete data[n];
+        continue;
+      }
+      cond[GetProName(n)]=data[n];
+    }
+    // console.log(cond);
+    db.collection("Information").find(cond,{Attachment: 0}).toArray(function(err,list)
     {
       if(err){return res.end(err.message);}
       var buf="序号,受理日期,姓名,工号,厂别,部门,违纪事宜简要,违纪日期,开出单位,性质概述,奖惩条例,处分类型,处分结束日期,职务,入职日期,职级,合同类型,职位类别,联系电话,领取人,领取时间,处理状态,完成时间,ER负责人,备注";
@@ -393,7 +422,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.get("/getNum",function(req,res)
   {
-    var runner=new radio.Runner("cnctug0sysc01",5521,function()
+    var runner=new radio.Runner("cnctug0weboa01",5521,function()
     {
         runner.run({delegation: function(o)
                     {
