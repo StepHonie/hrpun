@@ -1,6 +1,7 @@
 var express=require('express');
 var path=require('path');
 var radio=require('./Radio/radioForNode');
+var trans=require('./Method/basic');
 var app=express();
 var session=require("express-session");
 var mongo=require("mongodb").MongoClient;
@@ -10,26 +11,11 @@ var ActiveDirectory=require('activedirectory');
 let url=require("querystring");
 
 
-function GetProName(n)
-{
-  let o={"name": "Name",
-         "advDep" :  "Dep",
-         "advPlant" : "Plant",
-         "advNum" : "employeeNumber",
-         "advDate" : "WDate",
-         "advQuality" : "Quality",
-         "advCon" : "ConType"}
-  return o[n] || n;
-}
-
-
-
-
 mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 {
   if (err)
   {
-    console.log(e.message);
+    console.log(err.message);
     process.exit(0);
   }
   app.set('views','./views/pages');
@@ -56,23 +42,21 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.post("/",function(req,res)
   {
-    var name=req.body.username;
-    var pwd=req.body.password;
-    // cnctuc0dc10
-    var config={ url:'LDAP://cnctuc0dc10',
+    let name=req.body.username;
+    let pwd=req.body.password;
+    let config={ url:'LDAP://cnctuc0dc10',
                  baseDN: 'dc=corp,dc=jabil,dc=org',
                  attribute: {user: ["*"]},
                  username: "JABIL\\"+name,
                  password: pwd }
-    var ad=new ActiveDirectory(config);
+    let ad=new ActiveDirectory(config);
     ad.authenticate(config.username,config.password,function(err,user){
-      if(err){
-        console.log('Error:',err);
-        res.render("login",{error:true,msg:"Username or password is wrong."});
-        return;
+      if(err)
+      {
+        return res.render("login",{error:true,msg:"Username or password is wrong."});
       }
       if(user){
-        var name=new RegExp(name,"gi");
+        name=new RegExp(name,"gi");
         db.collection("Permission").find({ntid: name}).toArray(function(err,list)
         {
           if (err || list.length===0)
@@ -106,19 +90,19 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     {
       con.Name=undefined;
     }else{
-      con.Name=new RegExp(`.*${req.query.name}.*`,"ui");
+      con.Name={$regex:`.*${req.query.name}.*`,$options:"ui"};
     }
     if(req.query.advDep===undefined || req.query.advDep==="")
     {
       con.Dep=undefined;
     }else{
-      con.Dep=new RegExp(`.*${req.query.advDep}.*`,"ui");
+      con.Dep={$regex:`.*${req.query.advDep}.*`,$options: "ui"};
     }
     if(req.query.advPlant===undefined || req.query.advPlant==="")
     {
       con.Plant=undefined;
     }else{
-      con.Plant=new RegExp(`.*${req.query.advPlant}.*`,"ui");
+      con.Plant={$regex:`.*${req.query.advPlant}.*`,$options:"ui"};
     }
     con.employeeNumber=req.query.advNum || undefined;
     con.WDate=req.query.advDate || undefined;
@@ -144,7 +128,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         {
           db.collection("Permission").find({"role":"user"}).toArray(function(err,list2)
           {
-            let u=new Array;
+            let u=new Array();
             let keys=Object.keys(req.query);
             for (let n of keys)
             {
@@ -196,6 +180,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       }
     }
     let dep=req.session.user.Department;
+    // console.log("=====lout's dep=====",dep);
     db.collection("Information").find({"Dep":dep}).sort({"createTime":-1}).skip(pn*ps).limit(ps).toArray(function(err,list)
     {
       if(err) console.log(err);
@@ -214,8 +199,8 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.post('/uploadExcel',function(req,res)
   {
-    var json=req.body.toString();
-    var data=JSON.parse(json);
+    let json=req.body.toString();
+    let data=JSON.parse(json);
     for(let i=1;i<=data.length;i++)
     {
       let item=data[i];
@@ -224,28 +209,28 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         continue;
       }
       let o={SerNum: item[0],
-        SDate: item[1],
+        SDate: trans.dateTrans(item[1]),
         Name: item[2],
         employeeNumber: item[3],
         Plant: item[4],
         Dep: item[5],
         TxtArea: item[6],
-        iptWDate: item[7],
+        WDate: trans.dateTrans(item[7]),
         Unit: item[8],
         Quality: item[9],
         Rule: item[10],
         PunType: item[11],
-        EndDate: item[12],
+        EndDate: trans.dateTrans(item[12]),
         Pos: item[13],
-        InDate: item[14],
+        EntryDate: trans.dateTrans(item[14]),
         Level: item[15],
         ConType: item[16],
         JobType: item[17],
         Tel: item[18],
         Receiver: item[19],
-        GotDate: item[20],
+        GotDate: trans.dateTrans(item[20]),
         Status: item[21],
-        FinishDate: item[22],
+        FinishDate: trans.dateTrans(item[22]),
         Officer: item[23],
         Comments: item[24]};
         db.collection("Information").insert(o,function(err,res)
@@ -258,43 +243,54 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.get("/download",function(req,res)
   {
-    let data;
+    let data=req.query;
+    let cond=new Object();
+    let keys=Object.keys(data);
     if(req.session.user.role==="user")
     {
-      data={"Dep":req.session.user.Department};
+      cond={"Dep":req.session.user.Department};
     }else{
-      data=req.query;
+      cond=req.session.con;
+      // let str=JSON.stringify(cond);
+      // if(data.name!=="") cond.Name=new RegExp(`.*${req.query.name}.*`,"ui");
+      // if(data.advDep!=="")
+      // {
+      //   console.log("advDep:",req.query.advDep);
+      //   cond.Dep=new RegExp(`.*${req.query.advDep}.*`,"ui");
+      //   console.log("cond.Dep:",cond.Dep);
+      // }
+      // if(data.advPslant!=="") cond.Plant=new RegExp(`.*${req.query.advPlant}.*`,"ui");
+      // for (let n of keys)
+      // {
+      //   if (data[n]==="")
+      //   {
+      //     delete data[n];
+      //     continue;
+      //   }
+      //   let m=trans.getProName(n);
+      //   cond[m]=data[n];
+      // }
+      // console.log(cond);
     }
-    let keys=Object.keys(data);
-    let cond=new Object;
-    for (let n of keys)
-    {
-      if (data[n]==="")
-      {
-        delete data[n];
-        continue;
-      }
-      cond[GetProName(n)]=data[n];
-    }
-    // console.log(cond);
+
     db.collection("Information").find(cond,{Attachment: 0}).toArray(function(err,list)
     {
       if(err){return res.end(err.message);}
-      var buf="序号,受理日期,姓名,工号,厂别,部门,违纪事宜简要,违纪日期,开出单位,性质概述,奖惩条例,处分类型,处分结束日期,职务,入职日期,职级,合同类型,职位类别,联系电话,领取人,领取时间,处理状态,完成时间,ER负责人,备注";
+      var buf="受理日期,姓名,工号,厂别,部门,违纪事宜简要,违纪日期,开出单位,性质概述,奖惩条例,处分类型,处分结束日期,职务,入职日期,职级,合同类型,职位类别,联系电话,领取人,领取时间,处理状态,完成时间,ER负责人,备注";
       buf="<table border='1'><thead><tr><td>"+buf.split(",").join("</td><td>");
       buf+="</td></tr></thead><tbody>";
       for (var i=0;i<list.length;i++)
       {
         // 备注：此处处理日期格式时有误，数据库中保存为正确的格式。
         buf+="<tr>";
-        buf+="<td>"+list[i].SerNum+"</td>";
+        // buf+="<td>"+list[i].SerNum+"</td>";
         buf+="<td>"+list[i].SDate+"</td>";
         buf+="<td>"+list[i].Name+"</td>";
         buf+="<td>"+list[i].employeeNumber+"</td>";
         buf+="<td>"+list[i].Plant+"</td>";
         buf+="<td>"+list[i].Dep+"</td>";
         buf+="<td>"+list[i].TxtArea+"</td>";
-        buf+="<td>"+list[i].iptWDate+"</td>";
+        buf+="<td>"+list[i].WDate+"</td>";
         buf+="<td>"+list[i].Unit+"</td>";
         buf+="<td>"+list[i].Quality+"</td>";
         buf+="<td>"+list[i].Rule+"</td>";
@@ -326,6 +322,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     var json=req.body.toString();
     var json=JSON.parse(json);
     var id=json._id;
+    // console.log("=====the wdate been save to db=====",json.WDate);
     var date=new Date();
     if (id.length===0)
     {
@@ -338,12 +335,12 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       });
       return res.end("新增成功!");
     }else{
-      let doc=new Object;
+      let doc=new Object();
       db.collection("Information").find({_id:new ObjectId(id)}).toArray(function(err,old)
       {
         if (err) return res.end("Error");
         if (old.length===0) return res.end("This infor doesn't exist.");
-        let  oldKeys=Object.keys(old[0]);
+        let oldKeys=Object.keys(old[0]);
         let opArr={};
         doc.keysId=new ObjectId(id);
         doc.values=opArr;
@@ -355,7 +352,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
           {
             continue;
           }else{
-            opArr[n]=old[0][n]+">>>>>>>>>"+json[n];
+            opArr[n]=old[0][n]+">>>"+json[n];
           }
         }
         db.collection("opLog").insert(doc,function(err,res2)
@@ -393,7 +390,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       {
         return res.end("{\"error\": true}");
       }
-      // console.log(list[0].Attachment);
       try
       {
         let buf=list[0].Attachment.split(",")[1];
@@ -416,7 +412,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       {
         return res.end("{\"error\":true}");
       }
-      return res.end(JSON.stringify(list[0]));
+        return res.end(JSON.stringify(list[0]));
     });
   });
 
@@ -487,7 +483,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     db.collection("Information").find({}).toArray(function(err,list)
     {
       if(err || list.length===0) return res.end("Something wrong.");
-      // return res.end(JSON.stringify(list));
       var name=[];
       for(var i=0;i<list.length;i++)
       {

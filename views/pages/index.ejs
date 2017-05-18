@@ -99,28 +99,43 @@
                             <input name="advPlant" type="text" style="width:100px">
                           </div>
                           <div class="form-group">
-                            <label>违纪日期</label>
-                            <input name="advDate" type="date" style="width:100px">
                             <label>违纪类型</label>
                             <select name="advQuality" style="width:100px;height:25px">
-                                <option value="" style="display:none"></option>
-                                <option value="盗窃财物">盗窃财物</option>
-                                <option value="怠忽工作">怠忽工作</option>
-                                <option value="非吸烟区吸烟">非吸烟区吸烟</option>
-                                <option value="管理失职">工作失职</option>
-                                <option value="擅自离岗">擅自离岗</option>
-                                <option value="不服从上级管理">不服从上级管理</option>
-                                <option value="违反门禁规定">违反门禁规定</option>
-                                <option value="违反作业规定">违反作业规定</option>
-                                <option value="寻衅闹事">寻衅闹事</option>
-                                <option value="违反考勤规定">违反考勤规定</option>
-                                <option value="其他">其他</option>
-                            </select>
+                                  <option value="" style="display:none"></option>
+                                  <option value="盗窃财物">盗窃财物</option>
+                                  <option value="怠忽工作">怠忽工作</option>
+                                  <option value="非吸烟区吸烟">非吸烟区吸烟</option>
+                                  <option value="管理失职">工作失职</option>
+                                  <option value="擅自离岗">擅自离岗</option>
+                                  <option value="不服从上级管理">不服从上级管理</option>
+                                  <option value="违反门禁规定">违反门禁规定</option>
+                                  <option value="违反作业规定">违反作业规定</option>
+                                  <option value="寻衅闹事">寻衅闹事</option>
+                                  <option value="违反考勤规定">违反考勤规定</option>
+                                  <option value="其他">其他</option>
+                              </select>
                             <label>合同类型</label>
-                            <input name="advCon" type="text" style="width:100px">
+                            <select name="contractType" style="width:100px;height:25px">
+                              <option value="" style="display:none"></option>
+                              <option value="Contract-Jabil">Contract-Jabil</option>
+                              <option value="Agency EE (Vdr)">Agency EE (Vdr)</option>
+                              <option value="Foreigner">Foreigner</option>
+                              <option value="Student/Intern">Student/Intern</option>
+                            </select>
+                            <label>处分类型</label>
+                            <select name="punType" style="width:100px;height:25px">
+                                <option value="" style="display:none"></option>
+                                <option value="口头警告">口头警告</option>
+                                <option value="书面警告">书面警告</option>
+                                <option value="严重书面警告">严重书面警告</option>
+                                <option value="回劳务公司">退回劳务公司</option>
+                                <option value="立即解除劳动合同">立即解除劳动合同</option>
+                            </select>
+                            <label>违纪日期</label>
+                            <input name="advDate" type="date" style="width:100px;height:25px">
                           </div>
                   </div>
-                  <button id="advSearch" type="submit" class="btn btn-primary" style="height:30px;float:right;margin-bottom:3px;margin-right:10px;">Search</button>
+                  <button id="advSearch" type="submit" class="btn btn-primary" style="height:30px;float:right;margin:0 10px 7px 0;">Search</button>
               </div>
 					  </form>
 					<!-- </ul> -->
@@ -155,9 +170,13 @@
                           <p style="height:20px;width:650px;display:block;overflow:hidden"><%=x.TxtArea%></p>
                       </td>
                       <td class='Attachment'style="width:100px">
+                        <%if(!x.extFilename){%>
+                          <span style="display:none"></span>
+                        <%}else{%>
                           <a href="/getAttachment?id=<%=x._id%>" target="_blank" style="height:20px;width:80px;display:block;overflow:hidden;">
                               <%=x.extFilename%>
                           </a>
+                        <%}%>
                       </td>
                   </tr>
               <%}%>
@@ -253,7 +272,12 @@
                             </div>
                             <label class="col-sm-2 infoLabel">合同类型</label>
                             <div class="col-sm-2">
-                                <input id="contractType" type="text" class="form-control">
+                              <select id="contractType" class="form-control">
+                                  <option value="Contract-Jabil">Contract-Jabil</option>
+                                  <option value="Agency EE (Vdr)">Agency EE (Vdr)</option>
+                                  <option value="Foreigner">Foreigner</option>
+                                  <option value="Student/Intern">Student/Intern</option>
+                              </select>
                             </div>
                         </div>
                     </div>

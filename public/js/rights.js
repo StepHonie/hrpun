@@ -68,24 +68,27 @@ $(function()
               $("#iptTel").val(pi.Tel);
               $("#iptDep").val(pi.Dep);
               $("#iptWDate").val(pi.WDate);
-              $("#iptSDate").val(pi.SDate),
-              $("#iptPos").val(pi.Pos),
-              $("#iptRule").val(pi.Rule),
-              $("#selUnit").val(pi.Unit),
-              $("#iptPlant").val(pi.Plant),
-              $("#selStatus").val(pi.Status),
-              $("#iptOfficer").val(pi.Officer),
-              $("#iptEmail").val(pi.email),
-              $("#FinishDate").val(pi.FinishDate),
-              $("#GotDate").val(pi.GotDate),
-              $("#receiver").val(pi.Receiver),
-              $("#contractType").val(pi.ConType),
-              $("#EntryDate").val(pi.EntryDate),
-              $("#punType").val(pi.PunType),
-              $("#quality").val(pi.Quality),
-              // $("#inputfile").val(<a href="/getAttachment?id=<%=listInfo[i]._id%>" target="_blank"><%=listInfo[i].extFilename%></a>),
-              //$("#inputfile").hide();
-              $(".replaceable").replaceWith('<a class="replaceable" href="/getAttachment?id='+id+'" target="_blank" style="display:block;width:90px;height:20px;overflow:hidden">'+pi.extFilename+'</a>');
+              $("#iptSDate").val(pi.SDate);
+              $("#iptPos").val(pi.Pos);
+              $("#iptRule").val(pi.Rule);
+              $("#selUnit").val(pi.Unit);
+              $("#iptPlant").val(pi.Plant);
+              $("#selStatus").val(pi.Status);
+              $("#iptOfficer").val(pi.Officer);
+              $("#iptEmail").val(pi.email);
+              $("#FinishDate").val(pi.FinishDate);
+              $("#GotDate").val(pi.GotDate);
+              $("#receiver").val(pi.Receiver);
+              $("#contractType").val(pi.ConType);
+              $("#EntryDate").val(pi.EntryDate);
+              $("#punType").val(pi.PunType);
+              $("#quality").val(pi.Quality);
+              if(pi.extFilename==undefined)
+              {
+                $(".replaceable").replaceWith('<span class="replaceable" style="display:none"><span>');
+              }else{
+                $(".replaceable").replaceWith('<a class="replaceable" href="/getAttachment?id='+id+'" target="_blank" style="display:block;width:90px;height:20px;overflow:hidden">'+pi.extFilename+'</a>');
+              }
               $("#hdFileContent").val(pi.Attachment || "");
               $("#txtArea").val(pi.TxtArea);
               dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/2+"px")});
@@ -156,7 +159,6 @@ $(function()
         var first_sheet_name = workbook.SheetNames[0];
         var worksheet = workbook.Sheets[first_sheet_name];
         var info=XLSX.utils.sheet_to_json(worksheet,{header:1})
-        console.log(info);
         $.ajax({url:"/uploadExcel",
                 type:"post",
                 contentType:"application/octet-stream",
@@ -210,7 +212,13 @@ $(function()
     try{
       file=$("#inputfile")[0].files[0];
     }catch(e){
-      file=undefined;
+      // file=undefined;
+      file=" ";
+    }
+    if($("#iptNum").val()=="")
+    {
+      alert("Please enter employee number!");
+      return;
     }
     fr.onload=function()
     {
@@ -235,7 +243,7 @@ $(function()
                EntryDate: $("#EntryDate").val(),
                PunType: $("#punType").val(),
                Quality: $("#quality").val(),
-               TxtArea: $("#txtArea").val(),               //
+               TxtArea: $("#txtArea").val(),
                Attachment: this.result || ($("#hdFileContent").val()===""?"":$("#hdFileContent").val()),
                extFilename: file.name || $(".replaceable").text(),
                operator:$("#username").text()
