@@ -107,7 +107,8 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     con.employeeNumber=req.query.advNum || undefined;
     con.WDate=req.query.advDate || undefined;
     con.Quality=req.query.advQuality || undefined;
-    con.ConType=req.query.advCon || undefined;
+    con.ConType=req.query.contractType || undefined;
+    con.PunType=req.query.punType || undefined;
     req.session.con=req.session.con || {};
     for (var n in con)
     {
@@ -251,26 +252,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       cond={"Dep":req.session.user.Department};
     }else{
       cond=req.session.con;
-      // let str=JSON.stringify(cond);
-      // if(data.name!=="") cond.Name=new RegExp(`.*${req.query.name}.*`,"ui");
-      // if(data.advDep!=="")
-      // {
-      //   console.log("advDep:",req.query.advDep);
-      //   cond.Dep=new RegExp(`.*${req.query.advDep}.*`,"ui");
-      //   console.log("cond.Dep:",cond.Dep);
-      // }
-      // if(data.advPslant!=="") cond.Plant=new RegExp(`.*${req.query.advPlant}.*`,"ui");
-      // for (let n of keys)
-      // {
-      //   if (data[n]==="")
-      //   {
-      //     delete data[n];
-      //     continue;
-      //   }
-      //   let m=trans.getProName(n);
-      //   cond[m]=data[n];
-      // }
-      // console.log(cond);
     }
 
     db.collection("Information").find(cond,{Attachment: 0}).toArray(function(err,list)

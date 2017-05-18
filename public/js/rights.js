@@ -53,6 +53,10 @@ $(function()
 
   $("#infoTable").find("tbody tr").bind("click",function(e)
   {
+    if ($(e.target).is("a"))
+    {
+      return;
+    }
     var id=$(this).attr("oid");
     if (id===""){return;}
     $.ajax({url:"/getDetails",
