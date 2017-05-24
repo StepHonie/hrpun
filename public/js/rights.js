@@ -97,7 +97,8 @@ $(function()
               $("#txtArea").val(pi.TxtArea);
               dlgEdit.css({"left":((win.width()-dlgEdit.width())/2+"px"),"top":((win.height()-dlgEdit.height())/2+"px")});
               dlgEdit.show();
-            }});
+            }
+          });
 
     $('#btnDel').unbind("click").bind('click',function(e)
     {
@@ -110,15 +111,19 @@ $(function()
                dataType: "Text",
                success: function(res)
                  {
-                   $("tr[oid='"+id+"']").remove();
-                   dlgEdit.hide();
+                  //  alert("Program should do it automatically.");
+                     $("tr[oid='"+id+"']").remove();
+                     dlgEdit.hide();
                  }
                });
         }else{
-          dlgEdit.hide();
+          // dlgEdit.hide();
+          return;
         }
       });
-    });
+  });
+
+
 
   $('.btnClose').bind('click',function(e){dlgEdit.hide();});
 
@@ -170,7 +175,7 @@ $(function()
                 dataType:"text",
                 success: function(res)
                 {
-                  // alert(res);
+                  alert(res);
                   location.href=location.href;
                 }
               });
@@ -250,9 +255,7 @@ $(function()
                TxtArea: $("#txtArea").val(),
                Attachment: this.result || ($("#hdFileContent").val()===""?"":$("#hdFileContent").val()),
                extFilename: file.name || $(".replaceable").text(),
-               operator:$("#username").text()
-              };
-      // infoList.push(obj);
+               operator:$("#username").text()};
       $.ajax({url: "/saveInfo",
               type: "post",
               contentType: "application/octet-stream",

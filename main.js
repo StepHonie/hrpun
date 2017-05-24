@@ -181,7 +181,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       }
     }
     let dep=req.session.user.Department;
-    // console.log("=====lout's dep=====",dep);
     db.collection("Information").find({"Dep":dep}).sort({"createTime":-1}).skip(pn*ps).limit(ps).toArray(function(err,list)
     {
       if(err) console.log(err);
@@ -303,7 +302,6 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     var json=req.body.toString();
     var json=JSON.parse(json);
     var id=json._id;
-    // console.log("=====the wdate been save to db=====",json.WDate);
     var date=new Date();
     if (id.length===0)
     {
