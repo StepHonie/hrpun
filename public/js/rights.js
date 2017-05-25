@@ -80,7 +80,7 @@ $(function()
               $("#selStatus").val(pi.Status);
               $("#iptOfficer").val(pi.Officer);
               $("#iptEmail").val(pi.email);
-              $("#FinishDate").val(pi.FinishDate);
+              $("#FinishDate").val(pi.EndDate);
               $("#GotDate").val(pi.GotDate);
               $("#receiver").val(pi.Receiver);
               $("#contractType").val(pi.ConType);
@@ -122,8 +122,6 @@ $(function()
         }
       });
   });
-
-
 
   $('.btnClose').bind('click',function(e){dlgEdit.hide();});
 
@@ -245,7 +243,7 @@ $(function()
                Status: $("#selStatus").val(),
                Officer: $("#iptOfficer").val(),
                email: $("#iptEmail").val(),
-               FinishDate: $("#FinishDate").val(),
+               EndDate: $("#FinishDate").val(),
                GotDate: $("#GotDate").val(),
                Receiver: $("#receiver").val(),
                ConType: $("#contractType").val(),

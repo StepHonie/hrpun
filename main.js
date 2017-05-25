@@ -208,31 +208,38 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
       {
         continue;
       }
-      let o={SerNum: item[0],
-        SDate: trans.dateTrans(item[1]),
-        Name: item[2],
-        employeeNumber: item[3],
-        Plant: item[4],
-        Dep: item[5],
-        TxtArea: item[6],
-        WDate: trans.dateTrans(item[7]),
-        Unit: item[8],
-        Quality: item[9],
-        Rule: item[10],
-        PunType: item[11],
-        EndDate: trans.dateTrans(item[12]),
-        Pos: item[13],
-        EntryDate: trans.dateTrans(item[14]),
-        Level: item[15],
-        ConType: item[16],
-        JobType: item[17],
-        Tel: item[18],
-        Receiver: item[19],
-        GotDate: trans.dateTrans(item[20]),
-        Status: item[21],
-        FinishDate: trans.dateTrans(item[22]),
-        Officer: item[23],
-        Comments: item[24]};
+      let o={
+        // SerNum: item[0],
+        SDate: trans.dateTrans(item[2]),
+        // SDate: item[1],
+        Name: item[3],
+        employeeNumber: item[4],
+        Plant: item[5],
+        Dep: item[6],
+        TxtArea: item[7],
+        WDate: trans.dateTrans(item[8]),
+        // WDate: item[7],
+        Unit: item[9],
+        Quality: item[10],
+        Rule: item[11],
+        PunType: item[12],
+        EndDate: trans.dateTrans(item[13]),
+        // EndDate: item[12],
+        Pos: item[14],
+        EntryDate: trans.dateTrans(item[15]),
+        // EntryDate: item[14],
+        Level: item[16],
+        ConType: item[17],
+        JobType: item[18],
+        // Tel: item[19],
+        // Receiver: item[20],
+        // GotDate: trans.dateTrans(item[21]),
+        // GotDate: item[20],
+        // Status: item[22],
+        // FinishDate: trans.dateTrans(item[23]),
+        // FinishDate: item[22],
+        Officer: item[19],
+        Comments: item[20]};
         db.collection("Information").insert(o,function(err,res)
         {
           if(err) console.log(err.message)
@@ -252,16 +259,14 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     }else{
       cond=req.session.con;
     }
-
     db.collection("Information").find(cond,{Attachment: 0}).toArray(function(err,list)
     {
       if(err){return res.end(err.message);}
-      var buf="受理日期,姓名,工号,厂别,部门,违纪事宜简要,违纪日期,开出单位,性质概述,奖惩条例,处分类型,处分结束日期,职务,入职日期,职级,合同类型,职位类别,联系电话,领取人,领取时间,处理状态,完成时间,ER负责人,备注";
+      var buf="受理日期,姓名,工号,厂别,部门,违纪事宜简要,处分开始日期,开出单位,违纪性质,奖惩条例,处分类型,处分结束日期,职务,入职日期,职级,合同类型,成本类别,负责人,备注";
       buf="<table border='1'><thead><tr><td>"+buf.split(",").join("</td><td>");
       buf+="</td></tr></thead><tbody>";
       for (var i=0;i<list.length;i++)
       {
-        // 备注：此处处理日期格式时有误，数据库中保存为正确的格式。
         buf+="<tr>";
         // buf+="<td>"+list[i].SerNum+"</td>";
         buf+="<td>"+list[i].SDate+"</td>";
@@ -277,15 +282,15 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         buf+="<td>"+list[i].PunType+"</td>";
         buf+="<td>"+list[i].EndDate+"</td>";
         buf+="<td>"+list[i].Pos+"</td>";
-        buf+="<td>"+list[i].InDate+"</td>";
+        buf+="<td>"+list[i].EntryDate+"</td>";
         buf+="<td>"+list[i].Level+"</td>";
         buf+="<td>"+list[i].ConType+"</td>";
         buf+="<td>"+list[i].JobType+"</td>";
-        buf+="<td>"+list[i].Tel+"</td>";
-        buf+="<td>"+list[i].Receiver+"</td>";
-        buf+="<td>"+list[i].GotDate+"</td>";
-        buf+="<td>"+list[i].Status+"</td>";
-        buf+="<td>"+list[i].FinishDate+"</td>";
+        // buf+="<td>"+list[i].Tel+"</td>";
+        // buf+="<td>"+list[i].Receiver+"</td>";
+        // buf+="<td>"+list[i].GotDate+"</td>";
+        // buf+="<td>"+list[i].Status+"</td>";
+        // buf+="<td>"+list[i].FinishDate+"</td>";
         buf+="<td>"+list[i].Officer+"</td>";
         buf+="<td>"+list[i].Comments+"</td>";
         buf+="</tr>";
