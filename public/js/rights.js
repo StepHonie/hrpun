@@ -88,6 +88,7 @@ $(function()
               $("#EntryDate").val(pi.EntryDate);
               $("#punType").val(pi.PunType);
               $("#quality").val(pi.Quality);
+              alert(pi.Quality);
               if(pi.extFilename==undefined)
               {
                 $(".replaceable").replaceWith('<span class="replaceable" style="display:none"><span>');
@@ -184,34 +185,34 @@ $(function()
 
   $(".cancel").bind('click',function() {dlgSearch.hide();});
 
-  $('#iptNum').keydown(function(e)
-  {
-    var num=$('#iptNum').val();
-    var ev = document.all ? window.event : e;
-    if(ev.keyCode==13)
-    {
-     $.ajax({url: "/getNum",
-             type: "get",
-             data: "num="+num,
-             dataType: "Text",
-             success: function(res)
-             {
-               var json=JSON.parse(res);
-               if(json.error===true)
-               {
-                 alert("请输入正确的工号!");
-                 return;
-               }
-               $("#iptName").val(json.name);
-               $("#iptTel").val(json.telephoneNumber);
-               $("#iptDep").val(json.department);
-               $("#iptPos").val(json.title);
-               $("#iptPlant").val(json.company);
-               $("#iptEmail").val(json.mail);
-             }
-           });
-    }
-  });
+  // $('#iptNum').keydown(function(e)
+  // {
+  //   var num=$('#iptNum').val();
+  //   var ev = document.all ? window.event : e;
+  //   if(ev.keyCode==13)
+  //   {
+  //    $.ajax({url: "/getNum",
+  //            type: "get",
+  //            data: "num="+num,
+  //            dataType: "Text",
+  //            success: function(res)
+  //            {
+  //              var json=JSON.parse(res);
+  //              if(json.error===true)
+  //              {
+  //                alert("请输入正确的工号!");
+  //                return;
+  //              }
+  //              $("#iptName").val(json.name);
+  //              $("#iptTel").val(json.telephoneNumber);
+  //              $("#iptDep").val(json.department);
+  //              $("#iptPos").val(json.title);
+  //              $("#iptPlant").val(json.company);
+  //              $("#iptEmail").val(json.mail);
+  //            }
+  //          });
+  //   }
+  // });
 
   $('#saveInfo').bind('click',function(e)
   {
@@ -221,7 +222,7 @@ $(function()
       file=$("#inputfile")[0].files[0];
     }catch(e){
       // file=undefined;
-      file=" ";
+      file="";
     }
     if($("#iptNum").val()=="")
     {
@@ -234,7 +235,7 @@ $(function()
                employeeNumber: $("#iptNum").val(),
                Name: $("#iptName").val(),
                Tel: $("#iptTel").val(),
-               Dep: $("#iptDep").val(),
+               Dep: $.trim($("#iptDep").val().toUpperCase()),
                WDate: $("#iptWDate").val(),
                SDate: $("#iptSDate").val(),
                Pos: $("#iptPos").val(),
@@ -293,7 +294,7 @@ $(function()
 
   $('#addAdm').on('click',function(e)
   {
-    let num=prompt("Please enter Employee Number...");
+    //let num=prompt("Please enter Employee Number...");
     $.ajax({url:"/getNum",
             type: "get",
             data: "num="+num+"&role="+"mgr",
@@ -311,12 +312,24 @@ $(function()
           });
   });
 
+  $('#showModal').on('click',function(e)
+  {
+    $('input').each(function(){$(this).val("");});
+    $('#myModal').modal('show');
+  });
+
   $('#addUser').on('click',function(e)
   {
-    let num=prompt("Please enter Employee Number...");
+    //let num=prompt("Please enter Employee Number...");
+    let num=$('#Pnum').val(),title=$('#Ptitle').val().toUpperCase(),dep=$.trim($('#Pdep').val().toUpperCase()),role=$('#Prole').val();
+    if(num==="" || dep==="")
+    {
+      alert("Please complete employee number and department!");
+      return;
+    }
     $.ajax({url:"/getNum",
             type: "get",
-            data: "num="+num+"&role="+"user",
+            data: "num="+num+"&title="+title+"&dep="+dep+"&role="+role,
             dataType: "Text",
             success: function(res)
             {
@@ -326,9 +339,16 @@ $(function()
                 alert(json.content);
                 return;
               }
-              $("#tbUser").append('<tr><td>'+json.name+'</td><td>'+json.title+'</td><td>'+json.department+'</td><td><img style="display:none" src="/images/icons/png/close.png"></td><tr>');
+              if(role==="user")
+              {
+                //$("#tbUser").append('<tr><td>'+json.name+'</td><td>'+json.title+'</td><td>'+json.department+'</td><td><img style="display:none" src="/images/icons/png/close.png"></td><tr>');
+                $("#tbUser").append('<tr><td>'+json.name+'</td><td>'+dep+'</td><td>'+title+'</td><td><img style="display:none" src="/images/icons/png/close.png"></td><tr>');
+              }else{
+                $('#adm').append('<li><span>'+json.name+'</span><img class="delAdm" src="images/icons/16/036-cancel.png"></li>');
+              }
             }
           });
+    $('#myModal').modal('hide')
   });
 
   $('.perDel').on('click',function(e)

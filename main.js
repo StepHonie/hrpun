@@ -8,7 +8,7 @@ var mongo=require("mongodb").MongoClient;
 var ObjectId=require("mongodb").ObjectID;
 var bodyParser=require("body-parser");
 var ActiveDirectory=require('activedirectory');
-let url=require("querystring");
+var url=require("querystring");
 
 
 mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
@@ -180,6 +180,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         req.session.save();
       }
     }
+    //Todo
     let dep=req.session.user.Department;
     db.collection("Information").find({"Dep":dep}).sort({"createTime":-1}).skip(pn*ps).limit(ps).toArray(function(err,list)
     {
@@ -219,8 +220,8 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         TxtArea: item[7],
         WDate: trans.dateTrans(item[8]),
         // WDate: item[7],
-        Unit: item[9],
-        Quality: item[10],
+        Quality: item[9],
+        Unit: item[10],
         Rule: item[11],
         PunType: item[12],
         EndDate: trans.dateTrans(item[13]),
@@ -236,10 +237,10 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
         // GotDate: trans.dateTrans(item[21]),
         // GotDate: item[20],
         // Status: item[22],
-        // FinishDate: trans.dateTrans(item[23]),
-        // FinishDate: item[22],
         Officer: item[19],
-        Comments: item[20]};
+        FinishDate: trans.dateTrans(item[20]),
+        Status: item[21],
+        Comments: item[22]};
         db.collection("Information").insert(o,function(err,res)
         {
           if(err) console.log(err.message)
@@ -414,8 +415,9 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
                             }
                             if(list===undefined)
                             {
-                            callback({error: true,content: "User not found!"});
+                            callback({error: true,content: "User not found! Please enter correct employee number."});
                             }
+                            //此callback为下面自己在本地定义的
                             callback({error: false,list:list});
                         });
                     },
@@ -425,18 +427,20 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
                       {
                        res.end(JSON.stringify(info));
                       }else{
-                        var data=info.list[0];
-                        var ntid=data.sAMAccountName.toLowerCase();
-                        var role=req.query.role;
-                        if(role==="mgr")
+                        let data=info.list[0];
+                        let ntid=data.sAMAccountName.toLowerCase();
+                        let role=req.query.role;
+                        let title=req.query.title;
+                        let department=req.query.dep;
+                        if(role!==undefined)
                         {
-                          db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role},function(err)
-                          {
-                            if(err) console.log(err.message);
-                            res.end(JSON.stringify(data));
-                          });
-                        }else if(role==="user"){
-                          db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role,"title":data.title,"Department":data.department},function(err)
+                        //   db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role},function(err)
+                        //   {
+                        //     if(err) console.log(err.message);
+                        //     res.end(JSON.stringify(data));
+                        //   });
+                        // }else if(role==="user"){
+                          db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role,"title":title,"Department":department},function(err)
                           {
                             if(err) console.log(err.message);
                             res.end(JSON.stringify(data));

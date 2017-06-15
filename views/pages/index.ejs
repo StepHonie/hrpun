@@ -247,13 +247,13 @@
                         </div>
                         <label class="col-sm-2" style="width:14%;">    </label>
                         <div class="col-sm-9 form-group">
-                            <label class="col-sm-2 infoLeftLabel">部门</label>
+                            <label class="col-sm-2 infoLeftLabel">厂别</label>
+                            <div class="col-sm-2">
+                              <input id="iptPlant" type="text" class="form-control">
+                            </div>
+                            <label class="col-sm-2 infoLabel">部门</label>
                             <div class="col-sm-2">
                                 <input id="iptDep" type="text" class="form-control">
-                            </div>
-                            <label class="col-sm-2 infoLabel">厂别</label>
-                            <div class="col-sm-2">
-                                <input id="iptPlant" type="text" class="form-control">
                             </div>
                             <label class="col-sm-2 infoLabel">邮箱</label>
                             <div class="col-sm-2">
@@ -355,12 +355,12 @@
                             <div class="col-sm-2">
                                 <input id="EndDate" type="date" class="form-control">
                             </div>
-                              <label class="col-sm-2 infoLabel">附件</label>
-                              <div class="col-sm-2">
-                                  <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button>
-                                  <div class="col-sm-2" style="margin-top:8px;margin-left:3px;float:left;"><span class="replaceable"></span></div>
-                              </div>
-                              <input id="inputfile" type="file" style="display:none">
+                            <label class="col-sm-2 infoLabel">附件</label>
+                            <div class="col-sm-2">
+                                <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button>
+                                <div class="col-sm-2" style="margin-top:8px;margin-left:3px;float:left;"><span class="replaceable"></span></div>
+                            </div>
+                            <input id="inputfile" type="file" style="display:none">
                         </div>
                     </div>
                     <div class="form-group">
@@ -370,19 +370,10 @@
                             <div class="col-sm-2">
                                 <input id="iptOfficer" type="text" class="form-control">
                             </div>
-                            <label class="col-sm-2 infoLeftLabel">完成日期</label>
+                            <label class="col-sm-2 infoLabel">完成日期</label>
                             <div class="col-sm-2">
                                 <input id="FinishDate" type="date" class="form-control">
                             </div>
-
-                            <!-- <label class="col-sm-2 infoLabel">领取人</label>
-                            <div class="col-sm-2">
-                                <input id="receiver" type="text" class="form-control">
-                            </div>
-                            <label class="col-sm-2 infoLabel">领取时间</label>
-                            <div class="col-sm-2">
-                                <input id="GotDate" type="date" class="form-control">
-                            </div> -->
                         </div>
                     </div>
                     <input type="hidden" id="hdID" />
@@ -396,7 +387,7 @@
         <button id="saveInfo" class="btn btn-primary" style="float:right;margin-bottom:10px;">Save</button>
     </div>
 </div>
-<div id="dlgPer" class="panel panel-default" style="position:absolute;border:1px solid #3979D8;display:none">
+<div id="dlgPer" class="panel panel-default" style="z-index:1000;position:absolute;border:1px solid #3979D8;display:none">
 	<div class="panel-heading" style="background-color:#3979D8">
 		<h3 class="panel-title">
 			权限管控
@@ -407,7 +398,8 @@
 		<div class="perLeft" style="float:left;overflow:auto;width:22%;height:480px;background-color:#F7F7F7">
       <div style="margin-left:5px;margin-top:17px">
         <span style="color:#666666;font-size:20px;">Administrator</span>
-        <img id="addAdm" src="images/icons/24/001-add-blue.png" style="float:right;margin-right:5px">
+        <!-- <img data-toggle="modal" data-target="#myModal" src="images/icons/24/001-add-blue.png" style="float:right;margin-right:5px"> -->
+        <img id="showModal" src="images/icons/24/001-add-blue.png" style="float:right;margin-right:5px">
       </div>
       <ul id="adm">
         <%for(let i=0;i<perAdm.length;i++){
@@ -426,10 +418,10 @@
           <thead>
               <tr>
                   <td>Name</td>
-                  <td>Title</td>
                   <td>Department</td>
+                  <td>Title</td>
                   <td>
-                    <img id="addUser" src="images/icons/24/001-add-blue.png" style="float:right;margin-right:15px">
+                    <!-- <img id="addUser" src="images/icons/24/001-add-blue.png" style="float:right;margin-right:15px"> -->
                   </td>
               </tr>
               <tr id="trline"></tr>
@@ -441,8 +433,8 @@
               %>
               <tr>
                 <td><%=u.name%></td>
-                <td><%=u.title%></td>
                 <td><%=u.Department%></td>
+                <td><%=u.title%></td>
                 <td>
                   <img class="perDel" perType="user" pid="<%=u._id%>" src="/images/icons/png/close.png">
                 </td>
@@ -452,5 +444,54 @@
         </table>
 		</div>
 	</div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding:10px">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h5 class="modal-title" id="myModalLabel">Add User</h5>
+            </div>
+            <div class="modal-body" style="padding:10px">
+              <table style="width:90%">
+                <tr>
+                  <td>
+                    <label>工号</label>
+                  </td>
+                  <td>
+                    <input id="Pnum" type="text">
+                  </td>
+                  <td>
+                    <label>职务</label>
+                  </td>
+                  <td>
+                    <input id="Ptitle" type="text">
+                  </td>
+                </tr>
+                <tr>
+                <td>
+                  <label>部门</label>
+                </td>
+                <td>
+                  <input id="Pdep" type="text">
+                </td>
+                <td>
+                  <label>权限</label>
+                </td>
+                <td>
+                  <select id="Prole" style="width:175px;height:25px">
+                      <option value="user">User</option>
+                      <option value="mgr">Manager</option>
+                  </select>
+                </td>
+                </tr>
+              </table>
+            </div>
+            <div class="modal-footer" style="padding:5px">
+                <button id="addUser" type="button" class="btn btn-primary" style="margin-right:10px">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
 </div>
 </html>
