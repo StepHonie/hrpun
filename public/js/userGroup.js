@@ -1,6 +1,7 @@
 $(function()
 {
-  $('#addAdm').click(function(e){
+  $('#addAdm').click(function(e)
+  {
     alert("You want to add administrator!");
   });
 

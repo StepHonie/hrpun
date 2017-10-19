@@ -88,7 +88,6 @@ $(function()
               $("#EntryDate").val(pi.EntryDate);
               $("#punType").val(pi.PunType);
               $("#quality").val(pi.Quality);
-              alert(pi.Quality);
               if(pi.extFilename==undefined)
               {
                 $(".replaceable").replaceWith('<span class="replaceable" style="display:none"><span>');
@@ -119,7 +118,6 @@ $(function()
                  }
                });
         }else{
-          // dlgEdit.hide();
           return;
         }
       });
@@ -152,27 +150,33 @@ $(function()
     $('#iptCsv').on('change',function(e)
     {
       var file=$('#iptCsv')[0].files[0];
-      let fr=new FileReader;
-      fr.readAsArrayBuffer(file);
+      var fr = new FileReader;
+      fr.readAsBinaryString(file);
       fr.onload=function(e)
       {
-        var arraybuffer = fr.result;
-        var data = new Uint8Array(arraybuffer);
-        var arr = new Array();
-        for(var i = 0; i != data.length; ++i)
-        {
-          arr[i] = String.fromCharCode(data[i]);
-        }
-        var bstr = arr.join("");
-        var workbook = XLSX.read(bstr, {type:"binary"});
-        var first_sheet_name = workbook.SheetNames[0];
-        var worksheet = workbook.Sheets[first_sheet_name];
-        var info=XLSX.utils.sheet_to_json(worksheet,{header:1})
+        var data = fr.result;
+        var workbook = XLSX.read(data,{type:"binary"});
+        var sheetName = workbook.SheetNames[0];
+        var sheet = workbook.Sheets[sheetName];
+        var info = XLSX.utils.sheet_to_json(sheet,{header:1});
+        // var dd = JSON.stringify(info);
+        console.log(info);
+        // var arraybuffer = fr.result;
+        // var data = new Uint8Array(arraybuffer);
+        // var arr = new Array();
+        // for(var i=0;i!=data.length;++i)
+        // {
+        //   arr[i] = String.fromCharCode(data[i]);
+        // }
+        // var bstr = arr.join("");
+        // var workbook = XLSX.read(bstr, {type:"binary"});
+        // var first_sheet_name = workbook.SheetNames[0];
+        // var worksheet = workbook.Sheets[first_sheet_name];
+        // var info=XLSX.utils.sheet_to_json(worksheet,{header:1})
         $.ajax({url:"/uploadExcel",
-                type:"post",
+                type:"POST",
                 contentType:"application/octet-stream",
                 data:JSON.stringify(info),
-                dataType:"text",
                 success: function(res)
                 {
                   // alert(res);
@@ -256,7 +260,8 @@ $(function()
                TxtArea: $("#txtArea").val(),
                Attachment: this.result || ($("#hdFileContent").val()===""?"":$("#hdFileContent").val()),
                extFilename: file.name || $(".replaceable").text(),
-               operator:$("#username").text()};
+               operator:$("#username").text()
+             };
       $.ajax({url: "/saveInfo",
               type: "post",
               contentType: "application/octet-stream",
@@ -321,7 +326,8 @@ $(function()
   $('#addUser').on('click',function(e)
   {
     //let num=prompt("Please enter Employee Number...");
-    let num=$('#Pnum').val(),title=$('#Ptitle').val().toUpperCase(),dep=$.trim($('#Pdep').val().toUpperCase()),role=$('#Prole').val();
+    let num=$('#Pnum').val(),title=$('#Ptitle').val(),dep=$.trim($('#Pdep').val()),role=$('#Prole').val();
+    let enDep=encodeURIComponent(dep);
     if(num==="" || dep==="")
     {
       alert("Please complete employee number and department!");
@@ -329,7 +335,7 @@ $(function()
     }
     $.ajax({url:"/getNum",
             type: "get",
-            data: "num="+num+"&title="+title+"&dep="+dep+"&role="+role,
+            data: "num="+num+"&title="+title+"&dep="+enDep+"&role="+role,
             dataType: "Text",
             success: function(res)
             {

@@ -146,7 +146,6 @@
           <caption></caption>
           <thead>
               <tr id='trHead'>
-                  <!-- <th type="hidden">ID</th> -->
                   <th>Date</th>
                   <th>Department</th>
                   <th>Name</th>
@@ -158,8 +157,8 @@
           <tbody id="lstInfo">
               <%for (var i=0;i<listInfo.length || i<pageSize;i++)
               {
-                var x=listInfo[i];
-                    x=x || {_id: "",WDate: "",Dep:"",Name: "",Quality: "",extFilename: "",TxtArea: ""};
+                var x = listInfo[i];
+                    x = x || {_id: "",WDate: "",Dep:"",Name: "",Quality: "",extFilename: "",TxtArea: ""};
               %>
                   <tr oid="<%=x._id%>">
                       <td class='WDate a-btn' style="width:10%"><%=x.WDate%></td>
@@ -357,7 +356,7 @@
                             </div>
                             <label class="col-sm-2 infoLabel">附件</label>
                             <div class="col-sm-2">
-                                <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button>
+                                <!-- <button id="btnFile" type="button" style="padding-left:0;border:1px solid blue">upload</button> -->
                                 <div class="col-sm-2" style="margin-top:8px;margin-left:3px;float:left;"><span class="replaceable"></span></div>
                             </div>
                             <input id="inputfile" type="file" style="display:none">

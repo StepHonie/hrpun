@@ -1,7 +1,5 @@
 var express=require('express');
 var path=require('path');
-var radio=require('./Radio/radioForNode');
-var trans=require('./Method/basic');
 var app=express();
 var session=require("express-session");
 var mongo=require("mongodb").MongoClient;
@@ -10,11 +8,12 @@ var bodyParser=require("body-parser");
 var ActiveDirectory=require('activedirectory');
 var url=require("querystring");
 
+var radio=require('./Radio/radioForNode');
+var trans=require('./Method/basic');
 
 mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 {
-  if (err)
-  {
+  if (err){
     console.log(err.message);
     process.exit(0);
   }
@@ -40,6 +39,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     return next();
   });
 
+  //Authenticate premission
   app.post("/",function(req,res)
   {
     let name=req.body.username;
@@ -79,6 +79,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
     });
   });
 
+  //Get basic infomation from server
   app.get('/',function(req,res)
   {
     var pn=Number(req.query.pageNumber) || 0;
@@ -200,50 +201,40 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
 
   app.post('/uploadExcel',function(req,res)
   {
-    let json=req.body.toString();
-    let data=JSON.parse(json);
-    for(let i=1;i<=data.length;i++)
+    var data = JSON.parse(req.body);
+    for(var i=1;i<=data.length;i++)
     {
-      let item=data[i];
+      var item = data[i];
       if (!item)
       {
         continue;
       }
-      let o={
-        // SerNum: item[0],
-        SDate: trans.dateTrans(item[2]),
-        // SDate: item[1],
-        Name: item[3],
-        employeeNumber: item[4],
-        Plant: item[5],
-        Dep: item[6],
-        TxtArea: item[7],
-        WDate: trans.dateTrans(item[8]),
-        // WDate: item[7],
-        Quality: item[9],
-        Unit: item[10],
-        Rule: item[11],
-        PunType: item[12],
-        EndDate: trans.dateTrans(item[13]),
-        // EndDate: item[12],
-        Pos: item[14],
-        EntryDate: trans.dateTrans(item[15]),
-        // EntryDate: item[14],
-        Level: item[16],
-        ConType: item[17],
-        JobType: item[18],
-        // Tel: item[19],
-        // Receiver: item[20],
-        // GotDate: trans.dateTrans(item[21]),
-        // GotDate: item[20],
-        // Status: item[22],
-        Officer: item[19],
-        FinishDate: trans.dateTrans(item[20]),
-        Status: item[21],
-        Comments: item[22]};
-        db.collection("Information").insert(o,function(err,res)
+      var obj={ SDate: trans.dateTrans(item[2]),
+                Name: item[3],
+                employeeNumber: item[4],
+                Plant: item[5],
+                Dep: item[6],
+                TxtArea: item[7],
+                WDate: trans.dateTrans(item[8]),
+                Unit: item[9],
+                Quality: item[10],
+                Rule: item[11],
+                PunType: item[12],
+                EndDate: trans.dateTrans(item[13]),
+                Pos: item[14],
+                EntryDate: trans.dateTrans(item[15]),
+                Level: item[16],
+                ConType: item[17],
+                JobType: item[18],
+                Officer: item[19],
+                Comments: item[20] };
+        db.collection("Information").insert(obj,function(err,res)
         {
-          if(err) console.log(err.message)
+          if(err)
+          {
+            console.log(err);
+            res.end("Upload Failed!");
+          }
         });
       }
       res.end("Upload Successfully!");
@@ -431,15 +422,9 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
                         let ntid=data.sAMAccountName.toLowerCase();
                         let role=req.query.role;
                         let title=req.query.title;
-                        let department=req.query.dep;
+                        let department=decodeURIComponent(req.query.dep);
                         if(role!==undefined)
                         {
-                        //   db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role},function(err)
-                        //   {
-                        //     if(err) console.log(err.message);
-                        //     res.end(JSON.stringify(data));
-                        //   });
-                        // }else if(role==="user"){
                           db.collection("Permission").insert({"ntid":ntid,"name":data.name,"role":role,"title":title,"Department":department},function(err)
                           {
                             if(err) console.log(err.message);

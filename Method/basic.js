@@ -1,7 +1,7 @@
 
 function dateTrans(oldDate)
 {
-  let newDate;
+  var newDate;
   if(oldDate==="\\")
   {
     newdate="";
