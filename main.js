@@ -237,7 +237,7 @@ mongo.connect("mongodb://127.0.0.1:27017/Punishment",function(err,db)
           }
         });
       }
-      res.end("Upload Successfully!");
+      res.send("Upload Successful~");
     });
 
   app.get("/download",function(req,res)

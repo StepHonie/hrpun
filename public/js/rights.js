@@ -159,27 +159,13 @@ $(function()
         var sheetName = workbook.SheetNames[0];
         var sheet = workbook.Sheets[sheetName];
         var info = XLSX.utils.sheet_to_json(sheet,{header:1});
-        // var dd = JSON.stringify(info);
-        console.log(info);
-        // var arraybuffer = fr.result;
-        // var data = new Uint8Array(arraybuffer);
-        // var arr = new Array();
-        // for(var i=0;i!=data.length;++i)
-        // {
-        //   arr[i] = String.fromCharCode(data[i]);
-        // }
-        // var bstr = arr.join("");
-        // var workbook = XLSX.read(bstr, {type:"binary"});
-        // var first_sheet_name = workbook.SheetNames[0];
-        // var worksheet = workbook.Sheets[first_sheet_name];
-        // var info=XLSX.utils.sheet_to_json(worksheet,{header:1})
         $.ajax({url:"/uploadExcel",
                 type:"POST",
                 contentType:"application/octet-stream",
                 data:JSON.stringify(info),
                 success: function(res)
                 {
-                  // alert(res);
+                  alert(res);
                   location.href=location.href;
                 }
               });
